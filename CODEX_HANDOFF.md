@@ -1,6 +1,6 @@
 # Solo Leveling V1 — Codex Handoff and Implementation Brief
 
-**Status:** Approved product direction; implementation is in progress and incomplete. This document is the product source of truth for continuing work in this repository. It is a handoff brief, not a claim that the application is finished.
+**Status:** Phase 1 foundation is in place; approved V1 implementation remains in progress and incomplete. This document is the product source of truth for continuing work in this repository. It is a handoff brief, not a claim that the application is finished.
 
 **Project:** `D:\Startup\SoloLevel\solo-leveling-v1`  
 **Reviewed:** 9 November 2026  
@@ -173,17 +173,27 @@ Profile may show `Global Leaderboard — Locked / Under Development` with a conc
 
 Reviewed files include `package.json`, `README.md`, `src/App.tsx`, `src/types.ts`, `src/db.ts`, `src/backup.ts`, `src/engine/challenge.ts`, `src/styles.css`, and `vite.config.ts`.
 
-- Scripts: `npm run dev`, `npm run build` (`tsc -b && vite build`), `npm run preview`. No `test` script currently exists.
-- Dependencies include React 18, TypeScript ~5.6, Vite 5, Dexie 4, Framer Motion, Lucide, Recharts and `vite-plugin-pwa`.
-- Existing foundation has the five tabs, seven cards, four rank records, Dexie state row, JSON download/import, folder picker/weekly backup attempt, six theme selectors, a PWA config and disabled leaderboard messaging.
-- README itself calls out incomplete detailed workflows, career/nutrition/government modules, PIN/encryption, notification scheduler, advanced analytics and comprehensive tests. Module tiles are placeholders.
+- Scripts: `npm run dev`, `npm run build`, `npm run preview`, and `npm test` (Vitest). The project currently uses Vite 8 and the PWA plugin.
+- Dependencies include React 18, TypeScript ~5.6, Vite 8, Dexie 4, Framer Motion, Lucide, Vitest 5 and `vite-plugin-pwa` 2.
+- The application has five tabs, seven mission cards, four rank records, Dexie persistence, JSON download/import, folder picker/weekly backup attempts, a cycling theme button, PWA configuration and a disabled leaderboard.
+- README tracks remaining release work; individual workflows have partial local forms, and their visible presence does not mean the full approved modules are complete.
 - `App.tsx` currently uses `DEFAULT_DATA` and simplified inline state. Verify persistence, restore and side effects before extending. In particular inspect when saving an imported backup, stale closure risks, File System Access API availability and whether backup timestamps/filenames can overwrite same-day files.
-- `src/engine/challenge.ts` contains rank helpers and score/evaluation functions, but current evaluation counts only logged rows, applies outcomes immediately, uses a cumulative passed-challenge count for skip awards, and does not fully implement the approved consecutive boundary rule. Audit and correct this before building dependent modules.
+- `src/engine/challenge.ts` now scores expected eligible missions (including unlogged misses and Sunday fitness/meditation), excludes used skips from the denominator without counting them as completions, applies ranks independently, resets boundary streaks on failure, limits rank movement, and blocks duplicate/early evaluation. Five focused engine tests currently pass. Continue expanding coverage and check the remaining edge cases.
 - `src/types.ts` and backup validation are currently minimal; design versioned, testable domain models and migration paths without losing existing data.
 - Current welcome warning says local data is not cloud-synced. Retain that clarity and accurately describe restore limits.
 
-This snapshot is based on a code/readme inspection, not on a completed build or runtime verification. Do not call existing foundations complete merely because a control/card is visible.
+This snapshot includes a successful production build and focused unit-test run, but not full browser QA. Do not call existing foundations complete merely because a control/card is visible.
 
+
+### Current implementation status (9 November 2026)
+
+- `npm test` passes five challenge-engine tests; `npm run build` passes and generates the PWA service worker.
+- The welcome data warning, IndexedDB, JSON export/import, timestamped weekly folder-backup attempt, theme cycle, anime-inspired SVG background, reduced-motion-aware animations, local achievement milestones and weekly mission bar chart are present.
+- Seven mission names/descriptions now reflect the current user-approved rules: No FAP; gym Monday–Saturday and rest/meditation Sunday; career/openings; six-hour sleep goal; three-hour study; revision/next-day planning; and no intentional porn/Reels/Shorts, with accidental exposure allowed.
+- Local record forms exist for Fitness, Study/Revision, Career, Nutrition, Hydration, Sleep, No FAP and Digital Discipline.
+- The Government Jobs page is the final module in the Quests list. It links to official UPSC, SSC, IBPS and RRB pages and saves user-entered notices locally. Automated retrieval/verification is not implemented; do not describe these as live in-app aggregated alerts.
+- The product is not complete. Reminder scheduling only works while the app is open; there is no background push server. Study sessions and revision have basic forms but no complete spaced-repetition engine. Nutrition uses user-entered estimates, not an Indian food database/calculator. Fitness/career flows need deeper reporting and record management. Local PIN and encrypted backups are not implemented. Government notices are manually saved from official sites; automated retrieval/verification is not implemented. Expand backup validation/migrations, analytics/history, accessibility and PWA restore checks. Keep any network aggregator transparent and never fabricate a notice.
+- `npm audit --omit=dev --audit-level=high` reports zero production vulnerabilities. Full development-tool audit still reports moderate findings in the PWA build dependency chain; production dependencies audit clean. Reassess before forcing dependency changes.
 ## 12. Development phases
 
 **Phase 0 — Baseline and safety.** Inspect git/worktree status, files, current build/type errors, data model and routes/components. Record existing behavior. Add test tooling appropriate to the codebase without removing current dependencies. Preserve uncommitted work and existing user records.
@@ -236,5 +246,7 @@ Automated tests should cover pure engine and persistence/import logic; UI flows 
 ---
 
 **Scope note:** This document consolidates the user's reviewed Solo Leveling V1 decisions and the explicit weekly-backup correction from the referenced conversation, with the observed repository state. Where a balancing detail was not actually specified, this brief marks it unresolved rather than inventing a rule. The project remains a foundation requiring phased implementation and verification.
+
+
 
 
