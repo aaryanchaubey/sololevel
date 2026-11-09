@@ -13,7 +13,7 @@ export default function ModuleWorkspace({moduleId,modules,onChange,onBack}:Props
  const [company,setCompany]=useState('');const [role,setRole]=useState('');const [url,setUrl]=useState('');const [status,setStatus]=useState('Saved');const [deadline,setDeadline]=useState('');
  const [food,setFood]=useState('');const [portion,setPortion]=useState('1 serving');const [calories,setCalories]=useState(0);const [protein,setProtein]=useState(0);const [sleepHours,setSleepHours]=useState(6);const [quality,setQuality]=useState(3);
  const [reflectionOutcome,setReflectionOutcome]=useState('resisted');
- useEffect(()=>{if(!running)return;const timer=window.setInterval(()=>setSecondsLeft(s=>{if(s<=1){setRunning(false);return 0;}return s-1;}),1000);return()=>window.clearInterval(timer);},[running]);
+ useEffect(()=>{if(!running)return;const timer=window.setInterval(()=>setSecondsLeft(s=>Math.max(0,s-1)),1000);return()=>window.clearInterval(timer);},[running]);useEffect(()=>{if(running&&secondsLeft===0)setRunning(false);},[running,secondsLeft]);
  const addReflection=(kind:'selfControl'|'digital',outcome:string)=>{const entry:ReflectionEntry={id:id(),date:today(),outcome,notes:notes.trim(),createdAt:new Date().toISOString()};onChange({...modules,[kind]:[entry,...modules[kind]]});setNotes('');};
  const addWorkout=()=>{if(!exercise.trim())return;onChange({...modules,workouts:[{id:id(),date:today(),activity,exercise:exercise.trim(),sets:Number(sets),reps:Number(reps),weightKg:Number(weight),notes:notes.trim()},...modules.workouts]});setExercise('');setNotes('');};
  const addStudy=()=>{if(!subject.trim()||minutes<1)return;onChange({...modules,study:[{id:id(),date:today(),subject:subject.trim(),topic:topic.trim(),minutes:Number(minutes),notes:notes.trim()},...modules.study]});setNotes('');};
@@ -36,3 +36,4 @@ export default function ModuleWorkspace({moduleId,modules,onChange,onBack}:Props
   {moduleId==='digital'&&<><div className="panel module-form"><h2>Digital discipline log</h2><p className="muted">Accidental exposure is fine and does not count as intentional use.</p><label className="field-label">Outcome<select value={reflectionOutcome} onChange={e=>setReflectionOutcome(e.target.value)}><option value="avoided">Avoided intentional use</option><option value="intentional">Intentional use</option><option value="accidental">Accidental exposure</option></select></label>{field('Optional note',notes,setNotes)}<button className="primary" onClick={()=>addReflection('digital',reflectionOutcome)}>Save private entry</button></div>{records(modules.digital,x=><><b>{x.outcome}</b><span>{x.date}</span>{x.notes&&<small>{x.notes}</small>}</>)}</>}
  </section>;
 }
+
