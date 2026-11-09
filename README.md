@@ -28,7 +28,7 @@ Player records are stored locally in IndexedDB. There is no cloud sync or global
 
 ## Current implementation
 
-The app includes the seven daily missions, four rank records and challenge evaluator, local logging workspaces for fitness, study/revision, career, nutrition, hydration, sleep, No FAP and digital discipline, plus an official government recruitment source page with a local notice tracker, an in-app reminder setting, a seven-day mission chart, and permanent achievement milestones. The government page opens official sites directly; it does not automatically scrape or aggregate their notices.
+The app includes the seven daily missions, four rank records and challenge evaluator, local logging workspaces for fitness, study/revision, career, nutrition, hydration, sleep, No FAP and digital discipline, plus an official government recruitment source page with a local notice tracker, an in-app reminder setting, a seven-day mission chart, permanent achievement milestones, and an optional local PIN access gate. The government page opens official sites directly; it does not automatically scrape or aggregate their notices.
 
 ## Product handoff
 
@@ -38,4 +38,5 @@ Read [CODEX_HANDOFF.md](./CODEX_HANDOFF.md) for the approved product rules, exis
 
 - `npm test` — focused challenge-engine tests.
 - `npm run build` — TypeScript project checks, production bundle, and PWA service worker.
+
 

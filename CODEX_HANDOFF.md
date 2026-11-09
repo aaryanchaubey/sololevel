@@ -190,9 +190,9 @@ This snapshot includes a successful production build and focused unit-test run, 
 - `npm test` passes five challenge-engine tests; `npm run build` passes and generates the PWA service worker.
 - The welcome data warning, IndexedDB, JSON export/import, timestamped weekly folder-backup attempt, theme cycle, anime-inspired SVG background, reduced-motion-aware animations, local achievement milestones and weekly mission bar chart are present.
 - Seven mission names/descriptions now reflect the current user-approved rules: No FAP; gym Monday–Saturday and rest/meditation Sunday; career/openings; six-hour sleep goal; three-hour study; revision/next-day planning; and no intentional porn/Reels/Shorts, with accidental exposure allowed.
-- Local record forms exist for Fitness, Study/Revision, Career, Nutrition, Hydration, Sleep, No FAP and Digital Discipline.
+- Local record forms exist for Fitness, Study/Revision, Career, Nutrition, Hydration, Sleep, No FAP and Digital Discipline. Mission completion requires matching records (including 180 study minutes and 6 sleep hours); missed tasks have a reflection prompt. Recovery skips can be spent on an eligible mission during an active challenge.
 - The Government Jobs page is the final module in the Quests list. It links to official UPSC, SSC, IBPS and RRB pages and saves user-entered notices locally. Automated retrieval/verification is not implemented; do not describe these as live in-app aggregated alerts.
-- The product is not complete. Reminder scheduling only works while the app is open; there is no background push server. Study sessions and revision have basic forms but no complete spaced-repetition engine. Nutrition uses user-entered estimates, not an Indian food database/calculator. Fitness/career flows need deeper reporting and record management. Local PIN and encrypted backups are not implemented. Government notices are manually saved from official sites; automated retrieval/verification is not implemented. Expand backup validation/migrations, analytics/history, accessibility and PWA restore checks. Keep any network aggregator transparent and never fabricate a notice.
+- The product is not complete. Reminder scheduling only works while the app is open; there is no background push server. Study sessions and revision have basic forms but no complete spaced-repetition engine. Nutrition uses user-entered estimates, not an Indian food database/calculator. Fitness/career flows need deeper reporting and record management. The optional local PIN is implemented as an access gate using a salted PBKDF2 hash; it does not encrypt local data. Encrypted backups are not implemented. Government notices are manually saved from official sites; automated retrieval/verification is not implemented. Expand backup validation/migrations, analytics/history, accessibility and PWA restore checks. Keep any network aggregator transparent and never fabricate a notice.
 - `npm audit --omit=dev --audit-level=high` reports zero production vulnerabilities. Full development-tool audit still reports moderate findings in the PWA build dependency chain; production dependencies audit clean. Reassess before forcing dependency changes.
 ## 12. Development phases
 
@@ -246,6 +246,7 @@ Automated tests should cover pure engine and persistence/import logic; UI flows 
 ---
 
 **Scope note:** This document consolidates the user's reviewed Solo Leveling V1 decisions and the explicit weekly-backup correction from the referenced conversation, with the observed repository state. Where a balancing detail was not actually specified, this brief marks it unresolved rather than inventing a rule. The project remains a foundation requiring phased implementation and verification.
+
 
 
 
