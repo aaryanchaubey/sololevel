@@ -17,5 +17,6 @@ export interface FoodEntry {id:string;date:string;food:string;portion:string;cal
 export interface WaterEntry {id:string;date:string;milliliters:number;createdAt:string}
 export interface SleepEntry {id:string;date:string;hours:number;quality:number;notes:string}
 export interface ReflectionEntry {id:string;date:string;outcome:string;notes:string;createdAt:string}
-export interface AppModules {workouts:WorkoutEntry[];study:StudyEntry[];revisions:RevisionEntry[];career:CareerEntry[];food:FoodEntry[];water:WaterEntry[];sleep:SleepEntry[];selfControl:ReflectionEntry[];digital:ReflectionEntry[]}
+export interface GovernmentNotice {id:string;title:string;authority:string;status:'upcoming'|'open'|'closed';deadline:string;notificationUrl:string;applicationUrl:string;qualification:string;checkedAt:string}
+export interface AppModules {workouts:WorkoutEntry[];study:StudyEntry[];revisions:RevisionEntry[];career:CareerEntry[];food:FoodEntry[];water:WaterEntry[];sleep:SleepEntry[];selfControl:ReflectionEntry[];digital:ReflectionEntry[];governmentNotices:GovernmentNotice[]}
 export interface AppData {schemaVersion:number;profile:AppProfile;settings:AppSettings;ranks:Record<Category,RankProgress>;activeChallenge?:Challenge;challenges:Challenge[];missions:MissionLog[];inventory:InventoryItem[];achievements:string[];modules?:AppModules}
