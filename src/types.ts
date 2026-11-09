@@ -9,4 +9,12 @@ export interface RankProgress {category:Category;tier:Tier;boundaryWins:number;s
 export interface InventoryItem {id:string;kind:'recovery_skip'|'booster';target:Category|'any';label:string;quantity:number;earnedAt:string;expiresAt?:string}
 export interface AppSettings {theme:string;themeMode?:'auto'|'manual';sleepTargetHours:number;sleepMinimumHours:number;backupFolderHandle?:FileSystemDirectoryHandle;lastWeeklyBackupAt?:string;pinEnabled:boolean;quietHours:{enabled:boolean;start:string;end:string};leaderboardEnabled:boolean}
 export interface AppProfile {id:'local-player';displayName:string;createdAt:string;lifetimeXp:number;level:number}
-export interface AppData {schemaVersion:number;profile:AppProfile;settings:AppSettings;ranks:Record<Category,RankProgress>;activeChallenge?:Challenge;challenges:Challenge[];missions:MissionLog[];inventory:InventoryItem[];achievements:string[]}
+export interface WorkoutEntry {id:string;date:string;activity:string;exercise:string;sets:number;reps:number;weightKg:number;notes:string}
+export interface StudyEntry {id:string;date:string;subject:string;topic:string;minutes:number;notes:string}
+export interface RevisionEntry {id:string;topic:string;subject:string;dueDate:string;completedAt?:string;notes:string}
+export interface CareerEntry {id:string;company:string;role:string;url:string;status:string;deadline:string;notes:string;createdAt:string}
+export interface FoodEntry {id:string;date:string;food:string;portion:string;calories:number;proteinGrams:number}
+export interface WaterEntry {id:string;date:string;milliliters:number;createdAt:string}
+export interface SleepEntry {id:string;date:string;hours:number;quality:number;notes:string}
+export interface AppModules {workouts:WorkoutEntry[];study:StudyEntry[];revisions:RevisionEntry[];career:CareerEntry[];food:FoodEntry[];water:WaterEntry[];sleep:SleepEntry[]}
+export interface AppData {schemaVersion:number;profile:AppProfile;settings:AppSettings;ranks:Record<Category,RankProgress>;activeChallenge?:Challenge;challenges:Challenge[];missions:MissionLog[];inventory:InventoryItem[];achievements:string[];modules?:AppModules}

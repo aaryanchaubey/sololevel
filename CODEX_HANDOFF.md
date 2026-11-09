@@ -69,7 +69,7 @@ These exact core missions remain in V1:
 1. **No Ejaculation / self-control:** honest tracking toward the user's personal goal; distinguish urges, intentional actions, involuntary physiological events, accidental exposure and intentional consumption. Do not medicalize or shame normal physiology.
 2. **Fitness:** gym/training mission; on Sunday the mandatory mission becomes meditation. Optional workouts can still be logged.
 3. **Career:** one meaningful job search, application, preparation or career-development action; repeated browsing alone is not meaningful progress.
-4. **Sleep & Recovery:** record sleep and meet the configured target. Reviewed default target is 7 hours; current foundation also uses a configurable 6-hour minimum. Keep target/minimum configurable and handle sleep crossing midnight.
+4. **Sleep & Recovery:** record sleep and meet the configured target. User-confirmed daily goal is 6 hours. A configurable goal may be offered, but 6 hours is the V1 default. Handle sleep crossing midnight.
 5. **Focused Study:** 3 hours of focused study for the daily mission; provide timer/session records and meaningful focus tracking.
 6. **Revision & Planning:** revise due material and plan the next day.
 7. **Digital Discipline:** avoid intentional pornography, Reels and Shorts consumption. Accidental exposure does not automatically count as a failure.
@@ -236,4 +236,5 @@ Automated tests should cover pure engine and persistence/import logic; UI flows 
 ---
 
 **Scope note:** This document consolidates the user's reviewed Solo Leveling V1 decisions and the explicit weekly-backup correction from the referenced conversation, with the observed repository state. Where a balancing detail was not actually specified, this brief marks it unresolved rather than inventing a rule. The project remains a foundation requiring phased implementation and verification.
+
 
