@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="800" y1="0" x2="800" y2="900" gradientUnits="userSpaceOnUse"><stop stop-color="#22204A"/><stop offset=".48" stop-color="#38264D"/><stop offset="1" stop-color="#10131F"/></linearGradient>
+    <radialGradient id="moon"><stop stop-color="#F3D6FF" stop-opacity=".9"/><stop offset="1" stop-color="#A990FF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="blade" x1="1010" y1="300" x2="1180" y2="750" gradientUnits="userSpaceOnUse"><stop stop-color="#A6D8FF" stop-opacity=".72"/><stop offset="1" stop-color="#A6D8FF" stop-opacity="0"/></linearGradient>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1600v900H0z"/>
+  <circle cx="1190" cy="205" r="210" fill="url(#moon)"/>
+  <circle cx="1190" cy="205" r="76" fill="#E7D9FF" fill-opacity=".75"/>
+  <g fill="#E6D9FF" opacity=".62"><circle cx="202" cy="140" r="2"/><circle cx="364" cy="266" r="2"/><circle cx="590" cy="100" r="2"/><circle cx="780" cy="224" r="1.5"/><circle cx="1420" cy="360" r="2"/><circle cx="1020" cy="96" r="1.5"/><circle cx="85" cy="325" r="1.5"/><circle cx="920" cy="172" r="1.5"/></g>
+  <path d="M0 630 170 436l126 168 187-258 186 288 147-200 154 207 200-277 157 245 143-165 130 176v280H0z" fill="#22233B" fill-opacity=".74"/>
+  <path d="M0 700 188 582l144 114 154-154 172 150 182-128 135 127 197-166 168 149 130-100 130 92v134H0z" fill="#171A2A"/>
+  <g fill="#0D111D" opacity=".92"><path d="M0 717h1600v183H0z"/><path d="m198 717 36-169 34 169zm78 0 52-224 51 224zm102 0 32-135 31 135zm858 0 42-194 41 194zm94 0 64-261 62 261zm125 0 31-146 31 146z"/></g>
+  <g fill="#8277D9" opacity=".42"><rect x="248" y="601" width="7" height="7"/><rect x="329" y="556" width="7" height="7"/><rect x="1280" y="538" width="8" height="8"/><rect x="1394" y="619" width="7" height="7"/><rect x="1150" y="641" width="6" height="6"/></g>
+  <path d="M1034 352 1160 747h-29z" fill="url(#blade)"/>
+  <g fill="#090C15"><path d="m1010 529 40-95 39 95-20 98h-42z"/><path d="m1022 456 28-76 28 76-14 33h-29z"/><path d="m1025 619-39 121h30l36-101 35 101h30l-39-121z"/><path d="m1023 477-53 108 22 11 55-94 54 94 22-11-53-108z"/></g>
+  <path d="m1038 451 12-62 13 62" stroke="#D5CEFF" stroke-opacity=".8" stroke-width="3"/>
+</svg>
