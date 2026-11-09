@@ -16,5 +16,6 @@ export interface CareerEntry {id:string;company:string;role:string;url:string;st
 export interface FoodEntry {id:string;date:string;food:string;portion:string;calories:number;proteinGrams:number}
 export interface WaterEntry {id:string;date:string;milliliters:number;createdAt:string}
 export interface SleepEntry {id:string;date:string;hours:number;quality:number;notes:string}
-export interface AppModules {workouts:WorkoutEntry[];study:StudyEntry[];revisions:RevisionEntry[];career:CareerEntry[];food:FoodEntry[];water:WaterEntry[];sleep:SleepEntry[]}
+export interface ReflectionEntry {id:string;date:string;outcome:string;notes:string;createdAt:string}
+export interface AppModules {workouts:WorkoutEntry[];study:StudyEntry[];revisions:RevisionEntry[];career:CareerEntry[];food:FoodEntry[];water:WaterEntry[];sleep:SleepEntry[];selfControl:ReflectionEntry[];digital:ReflectionEntry[]}
 export interface AppData {schemaVersion:number;profile:AppProfile;settings:AppSettings;ranks:Record<Category,RankProgress>;activeChallenge?:Challenge;challenges:Challenge[];missions:MissionLog[];inventory:InventoryItem[];achievements:string[];modules?:AppModules}
