@@ -4,7 +4,6 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   type User,
 } from "firebase/auth";
@@ -40,10 +39,9 @@ export async function signInWithGoogle() {
 
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    await signInWithRedirect(firebaseAuth, provider);
-    return;
-  }
+  // Keep mobile and installed-PWA sign-in in the same browsing context. The
+  // redirect helper uses cross-site storage that modern mobile browsers may
+  // partition or block when the app is hosted outside Firebase Hosting.
   await signInWithPopup(firebaseAuth, provider);
 }
 
