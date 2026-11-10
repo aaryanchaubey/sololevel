@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import type { AppModules, ReflectionEntry } from "./types";
@@ -35,6 +35,7 @@ const names: Record<string, string> = {
   digital: "Digital discipline",
 };
 const foodPresets = IFCT_FOODS;
+const InteractiveWorld3D = lazy(() => import("./InteractiveWorld3D"));
 
 export default function ModuleWorkspace({
   moduleId,
@@ -502,6 +503,9 @@ export default function ModuleWorkspace({
           <p className="eyebrow">PLAYER MODULE</p>
           <h1>{names[moduleId] ?? "Personal module"}</h1>
         </div>
+        <Suspense fallback={null}>
+          <InteractiveWorld3D kind={moduleId} className="realm-world3d" />
+        </Suspense>
         <button className="round-back" type="button" onClick={onBack} aria-label="Back" title="Back">
           <ArrowLeft size={18} />
         </button>

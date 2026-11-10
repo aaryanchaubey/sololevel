@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowLeft,
@@ -56,6 +56,7 @@ import {
 } from "./firebaseAuth";
 import type { User } from "firebase/auth";
 import StepMap from "./StepMap";
+import RealmBanner from "./RealmBanner";
 import {
   downloadGoogleDriveBackup,
   googleSyncIsConfigured,
@@ -63,6 +64,7 @@ import {
   revokeGoogleDriveToken,
   uploadGoogleDriveBackup,
 } from "./googleDriveSync";
+const InteractiveWorld3D = lazy(() => import("./InteractiveWorld3D"));
 const missions: {
   id: MissionId;
   title: string;
@@ -1288,18 +1290,12 @@ export default function App() {
         >
           {tab === "Home" && (
             <>
-              <div className="hero">
-                <div>
-                  <p className="eyebrow">
-                    {weekday.toUpperCase()} · PLAYER STATUS
-                  </p>
-                  <h1>
-                    Rise beyond your <span>limits.</span>
-                  </h1>
-                  <p className="muted">
-                    Every completed mission is a step toward becoming stronger.
-                  </p>
-                </div>
+              <RealmBanner
+                kind="home"
+                eyebrow={`${weekday.toUpperCase()} · PLAYER STATUS`}
+                title={<>Rise beyond your <span>limits.</span></>}
+                subtitle="Every completed mission is a step toward becoming stronger."
+              >
                 <div className="hero-level">
                   <span>PLAYER LEVEL</span>
                   <b>{data.profile.level}</b>
@@ -1307,7 +1303,7 @@ export default function App() {
                     {data.profile.lifetimeXp.toLocaleString()} lifetime XP
                   </small>
                 </div>
-              </div>
+              </RealmBanner>
               <div className="rank-grid">
                 {categories.map((c) => (
                   <div className="rank-card panel" key={c}>
@@ -1615,16 +1611,21 @@ export default function App() {
             </>
           )}
           {tab === "Challenges" && (
-            <PersonalChallenges
-              challenges={personalChallenges}
-              logs={data.personalChallengeLogs ?? []}
-              activeId={data.activePersonalChallengeId}
-              focus={challengeFocus}
-              onCreate={startPersonalChallenge}
-              onLog={logPersonalChallenge}
-              onCancel={cancelPersonalChallenge}
-              onFocus={setChallengeFocus}
-            />
+            <div className="challenge-realm">
+              <Suspense fallback={null}>
+                <InteractiveWorld3D kind="challenges" className="challenge-realm-world" />
+              </Suspense>
+              <PersonalChallenges
+                challenges={personalChallenges}
+                logs={data.personalChallengeLogs ?? []}
+                activeId={data.activePersonalChallengeId}
+                focus={challengeFocus}
+                onCreate={startPersonalChallenge}
+                onLog={logPersonalChallenge}
+                onCancel={cancelPersonalChallenge}
+                onFocus={setChallengeFocus}
+              />
+            </div>
           )}
           {tab === "Quests" &&
             (activeModule === "government" ? (
@@ -1658,11 +1659,12 @@ export default function App() {
               />
             ) : (
               <>
-                <p className="eyebrow">MISSION ARCHIVE</p>
-                <h1>Quests & modules</h1>
-                <p className="muted">
-                  Open a module to log progress. Records stay on this device.
-                </p>
+                <RealmBanner
+                  kind="quests"
+                  eyebrow="MISSION ARCHIVE"
+                  title="Quests & modules"
+                  subtitle="Open a module to log progress. Records stay on this device."
+                />
                 <div className="module-grid">
                   {missions.map((m) => {
                     const Icon = m.icon;
@@ -1721,8 +1723,12 @@ export default function App() {
             ))}
           {tab === "Progress" && (
             <>
-              <p className="eyebrow">PLAYER RECORD</p>
-              <h1>Progress & ranks</h1>
+              <RealmBanner
+                kind="progress"
+                eyebrow="PLAYER RECORD"
+                title="Progress & ranks"
+                subtitle="Your long-term gains, one challenge at a time."
+              />
               <section className="panel monthly-summary">
                 <div className="section-head">
                   <div>
@@ -1901,8 +1907,12 @@ export default function App() {
           )}
           {tab === "Inventory" && (
             <>
-              <p className="eyebrow">REWARD STORAGE</p>
-              <h1>Inventory</h1>
+              <RealmBanner
+                kind="inventory"
+                eyebrow="REWARD STORAGE"
+                title="Inventory"
+                subtitle="Turn earned XP into rewards you choose."
+              />
               <div className="panel inventory-summary">
                 <Archive />
                 <div>

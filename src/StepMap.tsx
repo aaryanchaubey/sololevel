@@ -1,12 +1,16 @@
-import { Check, LockKeyhole } from "lucide-react";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { MissionLog } from "./types";
+import { LANDSCAPE_JOURNEY, PORTRAIT_JOURNEY } from "./journeyPath";
+
+const InteractiveWorld3D = lazy(() => import("./InteractiveWorld3D"));
 
 type Props = { startDate?: string; missions: MissionLog[] };
 
+const localDateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
 export default function StepMap({ startDate, missions }: Props) {
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const todayKey = localDateKey(new Date());
   const elapsed = startDate
     ? Math.max(
         1,
@@ -21,34 +25,62 @@ export default function StepMap({ startDate, missions }: Props) {
       )
     : 0;
   const [selectedDay, setSelectedDay] = useState(startDate ? elapsed : 1);
+  const [portrait, setPortrait] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 620px)").matches,
+  );
+
   useEffect(() => {
     if (startDate) setSelectedDay(elapsed);
   }, [startDate, elapsed]);
-  const challengeEnd = startDate ? new Date(`${startDate}T12:00:00`) : undefined;
-  challengeEnd?.setDate(challengeEnd.getDate() + 20);
-  const challengeEndKey = challengeEnd
-    ? `${challengeEnd.getFullYear()}-${String(challengeEnd.getMonth() + 1).padStart(2, "0")}-${String(challengeEnd.getDate()).padStart(2, "0")}`
-    : "";
-  const completedDates = new Set(
-    missions
-      .filter(
-        (entry) =>
-          entry.status === "complete" &&
-          (!startDate || (entry.date >= startDate && entry.date <= challengeEndKey)),
-      )
-      .map((entry) => entry.date),
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 620px)");
+    const update = () => setPortrait(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  const challengeEndKey = useMemo(() => {
+    if (!startDate) return "";
+    const end = new Date(`${startDate}T12:00:00`);
+    end.setDate(end.getDate() + 20);
+    return localDateKey(end);
+  }, [startDate]);
+  const completedDates = useMemo(
+    () => new Set(
+      missions
+        .filter((entry) => entry.status === "complete" && (!startDate || (entry.date >= startDate && entry.date <= challengeEndKey)))
+        .map((entry) => entry.date),
+    ),
+    [missions, startDate, challengeEndKey],
   );
+  const completedDays = useMemo(() => {
+    if (!startDate) return [];
+    return Array.from({ length: 21 }, (_, index) => {
+      const date = new Date(`${startDate}T12:00:00`);
+      date.setDate(date.getDate() + index);
+      return completedDates.has(localDateKey(date)) ? index + 1 : 0;
+    }).filter(Boolean);
+  }, [completedDates, startDate]);
+  const points = portrait ? PORTRAIT_JOURNEY : LANDSCAPE_JOURNEY;
   const selectedDate = startDate ? new Date(`${startDate}T12:00:00`) : undefined;
   selectedDate?.setDate(selectedDate.getDate() + selectedDay - 1);
-  const selectedDateKey = selectedDate
-    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`
-    : "";
+  const selectedDateKey = selectedDate ? localDateKey(selectedDate) : "";
   const selectedLogs = missions.filter((entry) => entry.date === selectedDateKey);
   const selectedCompleted = selectedLogs.filter((entry) => entry.status === "complete").length;
 
   return (
-    <section className="step-map panel" aria-label="21-day challenge path">
-      <div className="step-map-shade" aria-hidden="true" />
+    <section className={`step-map panel${portrait ? " step-map-portrait" : ""}`} aria-label="21-day challenge path">
+      <Suspense fallback={null}>
+        <InteractiveWorld3D
+          kind="journey"
+          className="journey-world"
+          points={points}
+          currentDay={Math.max(1, elapsed)}
+          completedDays={completedDays}
+        />
+      </Suspense>
       <div className="step-map-content">
         <div className="step-map-heading">
           <div>
@@ -60,49 +92,29 @@ export default function StepMap({ startDate, missions }: Props) {
                 : "Start a challenge to light the first step."}
             </p>
           </div>
-          <div className="step-map-medal" aria-hidden="true">21</div>
         </div>
-        <div className="step-path">
-          {Array.from({ length: 21 }, (_, index) => {
+        <div className="step-path" aria-label="Select a challenge day">
+          {points.map((point, index) => {
             const dayNumber = index + 1;
-            const date = startDate
-              ? new Date(`${startDate}T12:00:00`)
-              : undefined;
+            const date = startDate ? new Date(`${startDate}T12:00:00`) : undefined;
             date?.setDate(date.getDate() + index);
-            const dateKey = date
-              ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-              : "";
+            const dateKey = date ? localDateKey(date) : "";
             const locked = !startDate || dayNumber > elapsed;
             const completed = Boolean(dateKey && completedDates.has(dateKey));
             const current = Boolean(startDate && dayNumber === elapsed);
-            const playerHere = dayNumber === Math.max(1, elapsed);
-            const state = locked ? "locked" : current ? "current" : completed ? "complete" : "open";
+            const state = current ? "current" : completed ? "complete" : locked ? "locked" : "open";
             return (
               <button
                 className={`step-node ${state}${selectedDay === dayNumber ? " selected" : ""}`}
                 key={dayNumber}
                 type="button"
+                style={{ left: `${point.x}%`, top: `${point.y}%` }}
                 aria-label={`Day ${dayNumber}: ${state}${current ? ", your current step" : ""}`}
                 aria-pressed={selectedDay === dayNumber}
                 title={`View day ${dayNumber} · ${state}`}
                 onClick={() => setSelectedDay(dayNumber)}
               >
                 <span className="step-number">{dayNumber}</span>
-                <span className="step-label">Day {dayNumber}</span>
-                {playerHere && (
-                  <img
-                    className={`step-climber${startDate ? "" : " idle"}`}
-                    src="/journey-climber-v1-small.png"
-                    alt=""
-                    aria-hidden="true"
-                    decoding="async"
-                  />
-                )}
-                {completed ? (
-                  <Check size={13} aria-label="Completed mission logged" />
-                ) : locked ? (
-                  <LockKeyhole size={11} aria-hidden="true" />
-                ) : null}
               </button>
             );
           })}

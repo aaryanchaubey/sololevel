@@ -200,3 +200,63 @@ button:not(:disabled):hover:not(:active){transform:translateY(-1px)}
 .realm-workspace .module-form{border-color:color-mix(in srgb,var(--realm-glow) 23%,var(--line));box-shadow:0 14px 30px #0002,inset 0 1px #ffffff0a}
 @keyframes realm-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.realm-workspace{animation:none}}
+
+/* 3D journey: keep the artwork open and use the day digits as the only step badges. */
+.step-map{position:relative;isolation:isolate;overflow:hidden;min-height:0;aspect-ratio:1.95/1;padding:0;background:#0b1427 url('/challenge-journey-v2.jpg') center 52%/cover no-repeat;border-color:color-mix(in srgb,var(--accent) 38%,var(--line));box-shadow:0 28px 70px #0007,inset 0 1px #ffffff17}
+.step-map::before{z-index:0;background:linear-gradient(90deg,#07101c46,transparent 46%),linear-gradient(0deg,#07101c52,transparent 22%)}
+.step-map-content{position:absolute;inset:0;z-index:2;pointer-events:none}
+.step-map-heading{position:absolute;left:clamp(18px,3vw,42px);top:clamp(18px,3vw,35px);z-index:2;width:min(62%,620px);display:block;text-shadow:0 2px 12px #050a16cc}
+.step-map-heading h2{font-size:clamp(22px,3.2vw,40px);text-transform:uppercase;letter-spacing:.02em}
+.step-map-heading .eyebrow{margin-bottom:7px}
+.step-map-heading .muted{color:#e0e8f5;font-size:clamp(11px,1.2vw,14px)}
+.step-path{position:absolute;inset:0;z-index:2;display:block;margin:0;perspective:none;pointer-events:none}
+.step-node{position:absolute;left:0;top:0;display:grid;width:42px;height:42px;min-height:0;padding:0;place-items:center;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;color:#edf5ff;box-shadow:none;backdrop-filter:none;pointer-events:auto;overflow:visible}
+.step-node:nth-child(n){transform:translate(-50%,-50%)}
+.step-node:nth-child(3n+2),.step-node:nth-child(3n){transform:translate(-50%,-50%)}
+.step-node:hover{transform:translate(-50%,-50%) scale(1.18);filter:brightness(1.2);box-shadow:none}
+.step-number{position:relative;z-index:1;display:grid;place-items:center;width:100%;height:100%;font:700 20px 'Space Grotesk';color:#e9f1ff;text-shadow:0 2px 6px #030813,0 0 12px #07101acc;transition:color .18s ease,text-shadow .18s ease,transform .18s ease}
+.step-node.complete .step-number{color:#ffe3a5;text-shadow:0 0 12px #ffc75eaa,0 2px 6px #050813}
+.step-node.locked .step-number{color:#d6deeb;text-shadow:0 2px 6px #030813}
+.step-node.current .step-number{color:#fff;text-shadow:0 0 7px #fff,0 0 22px #42dfff,0 2px 7px #030813;transform:scale(1.28)}
+.step-node.selected:not(.current) .step-number{color:var(--accent);text-shadow:0 0 15px color-mix(in srgb,var(--accent) 80%,transparent),0 2px 6px #030813;transform:scale(1.22)}
+.step-node:focus-visible{outline:1px solid #fff;outline-offset:1px;z-index:5}
+.step-day-detail{position:absolute;left:clamp(18px,3vw,42px);right:clamp(18px,3vw,42px);bottom:16px;z-index:4;display:flex;align-items:center;gap:12px;min-height:38px;margin:0;padding:7px 10px;border:0;border-top:1px solid #dceaff4d;border-radius:0;background:linear-gradient(90deg,#07101c4a,transparent);color:#f3f7ff;backdrop-filter:none;pointer-events:auto;text-shadow:0 1px 6px #050a16}
+.step-day-detail b{font:700 13px 'Space Grotesk';color:#fff}
+.step-day-detail span,.step-day-detail small{font-size:10px;color:#e3eafa}
+.step-day-detail small{margin-left:auto;text-align:right}
+.world3d{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.world3d-canvas{display:block;width:100%;height:100%;pointer-events:none}
+.world3d-fallback{position:absolute;width:88px;height:104px;object-fit:contain;transform:translate(-50%,-88%);filter:drop-shadow(0 7px 11px #030813c9)}
+.world3d.journey-world{z-index:1}
+.step-map-portrait{aspect-ratio:.72/1;min-height:500px;max-height:760px;background-image:url('/challenge-journey-mobile-v1.jpg');background-position:center center}
+.step-map-portrait .step-map-heading{left:18px;top:17px;width:68%;}
+.step-map-portrait .step-map-heading h2{font-size:22px}
+.step-map-portrait .step-map-heading .muted{font-size:11px}
+.step-map-portrait .step-node{width:34px;height:34px}
+.step-map-portrait .step-number{font-size:15px}
+.step-map-portrait .step-node.current .step-number{transform:scale(1.25)}
+.step-map-portrait .step-day-detail{left:14px;right:14px;bottom:10px;min-height:42px;gap:8px}
+.step-map-portrait .step-day-detail small{font-size:9px}
+.step-map-portrait .world3d-fallback{width:70px;height:84px}
+
+/* Real-time 3D artifacts for the existing module destinations. */
+.realm-header{position:relative;isolation:isolate;min-height:116px;overflow:hidden}
+.realm-header>div:first-child{position:relative;z-index:2}
+.realm-header .realm-world3d{position:absolute;inset:auto 12px 0 auto;width:160px;height:120px;z-index:1;opacity:.98;filter:drop-shadow(0 7px 12px color-mix(in srgb,var(--realm-glow) 34%,transparent))}
+.realm-header:has(.realm-world3d)::after{right:120px;opacity:.4}
+@media(max-width:900px){.step-map{aspect-ratio:1.45/1}.step-map-heading{width:50%}.step-node{width:36px;height:36px}.step-number{font-size:18px}}
+@media(max-width:620px){.step-map{aspect-ratio:auto;min-height:0}.step-map-portrait{min-height:500px;max-height:680px;aspect-ratio:.72/1;background-size:cover}.step-map-portrait .step-map-heading{width:70%}.step-map-portrait .step-node{width:32px;height:32px}.step-map-portrait .step-number{font-size:14px}.step-map-portrait .step-day-detail{flex-wrap:wrap;align-content:center}.step-map-portrait .step-day-detail small{width:100%;margin:0;text-align:left}.realm-header{min-height:105px;padding-right:95px}.realm-header .realm-world3d{right:4px;width:105px;height:100px}.realm-header:has(.realm-world3d)::after{right:60px}}
+@media(prefers-reduced-motion:reduce){.step-node,.step-node .step-number{transition:none}.step-node.current .step-number{animation:none}}
+.realm-banner{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:142px;margin:0 0 20px;padding:18px clamp(18px,3vw,32px);overflow:hidden;border:1px solid color-mix(in srgb,var(--realm-glow,var(--accent)) 31%,var(--line));border-radius:17px;background:linear-gradient(112deg,color-mix(in srgb,var(--realm-glow,var(--accent)) 10%,var(--panel)),color-mix(in srgb,var(--panel) 80%,transparent));box-shadow:0 16px 34px #0004,inset 0 1px #ffffff15}
+.realm-banner-copy{position:relative;z-index:2;width:min(68%,720px)}
+.realm-banner-copy .eyebrow{color:var(--realm-glow,var(--accent))}
+.realm-banner-copy h1{margin:0;font:600 clamp(25px,3.7vw,39px) 'Space Grotesk';line-height:1.12;text-shadow:0 3px 18px color-mix(in srgb,var(--realm-glow,var(--accent)) 25%,transparent)}
+.realm-banner-copy h1 span{color:var(--accent)}
+.realm-banner-copy .muted{margin:8px 0 0}
+.realm-banner-world{position:absolute;right:14px;top:0;width:180px;height:100%;z-index:1;opacity:.92;filter:drop-shadow(0 8px 16px color-mix(in srgb,var(--realm-glow,var(--accent)) 34%,transparent))}
+.realm-banner-side{position:relative;z-index:2}
+.realm-quests{--realm-glow:#8dafff}.realm-challenges{--realm-glow:#77dfff}
+.challenge-realm{position:relative;isolation:isolate}
+.challenge-realm-world{position:absolute;top:-16px;right:4%;width:230px;height:190px;z-index:-1;opacity:.22;pointer-events:none}
+.realm-inventory{--realm-glow:#8be0ad}.realm-progress{--realm-glow:#f2c878}.realm-home{--realm-glow:#b6a0ff}
+@media(max-width:620px){.realm-banner{min-height:116px;padding:14px 13px;margin-bottom:15px;gap:8px}.realm-banner-copy{width:72%}.realm-banner-copy h1{font-size:24px}.realm-banner-copy .muted{font-size:10px;max-width:245px}.realm-banner-world{right:2px;width:112px;opacity:.72}.realm-banner-side .hero-level{min-width:74px;padding:8px}.realm-banner-side .hero-level b{font-size:22px}.realm-banner-side .hero-level small{font-size:8px}.challenge-realm-world{width:135px;height:120px;right:0;top:-8px}}
