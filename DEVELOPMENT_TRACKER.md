@@ -17,7 +17,7 @@
 | 2 | Fitness and recovery workflows | Implementation complete; manual browser QA remains |
 | 3 | Study, revision and planning | Implementation complete; date-boundary/manual browser QA remains |
 | 4 | Career and private-sector applications | Implementation complete; manual browser QA remains |
-| 5 | Nutrition and hydration | IFCT 2017 sourced macro reference for 20 foods and custom estimates; recipe nutrient calculator and micronutrients remain |
+| 5 | Nutrition and hydration | 20-food IFCT reference, ingredient-weight recipe calculator, and sourced calcium/iron coverage; broader coverage remains |
 | 6 | Government recruitment discovery (last) | Manual official-source workflow implemented; verified automatic feed requires external source/service work |
 | 7 | Backup/security, analytics, accessibility and release verification | Core challenge/backup/security implementation; build, device QA and policy-dependent items remain |
 
@@ -95,8 +95,9 @@
 ## Phase 5 — Nutrition, hydration, No FAP and digital discipline
 
 - [x] Replace unsourced presets with 20 cited IFCT 2017 Table 1 entries. The app displays code, sampled-region count, provenance and scales per-100 g macro values to serving grams.
-- [ ] Expand food coverage; calculate mixed-recipe nutrition by ingredient and servings; import cited micronutrients (calcium, iron, etc.) with confidence labels. The current dataset is intentionally partial and has no recipe calculator.
-- [ ] Add sourced micronutrients and confidence fields; custom source/provenance is retained.
+- [x] Calculate recipes from measured IFCT ingredient weights and servings; save per-serving macro estimates and ingredient/code provenance in the food log.
+- [x] Add sourced calcium and iron where IFCT Table 5 contains values. Missing cells remain unavailable; recipe totals show only when every ingredient has that nutrient.
+- [ ] Expand the partial IFCT catalog; custom ingredients and other micronutrients beyond calcium and iron are not yet included in automatic recipe calculations.
 - [x] Support custom meals and preserve recipe/food provenance. The preset list remains a starter, not a complete food database.
 - [x] Hydration: configurable personal target, 150/250/500 ml quick-add, custom amounts, daily history and 7-day total. Do not force one universal target.
 - [x] No FAP log is private and records outcomes neutrally; involuntary events and urges have distinct outcomes.
@@ -142,6 +143,6 @@
 ## Explicit external/manual completion items
 
 - Automatic government notice aggregation is not safe to mark complete without verified official data feeds, source attribution/refresh checks, and an explicitly hosted aggregation service. V1 remains local-first and currently has no backend deployment; the existing module truthfully supports official links and user-entered notices.
-- A verified Indian food-composition dataset and sourced micronutrients require importing/licensing/attributing the authoritative data; the current small starter set is explicitly an estimate.
+- The app now attributes a partial IFCT 2017 catalog and its derived recipe estimates. Broader food coverage, additional IFCT micronutrients, custom recipe ingredients, and future packaged-food data remain open.
 - User must run the production build and install/offline/restore checks in their browser/device. This coding session does not claim those results.
 - Task booster award rate/effect/cap/expiry are intentionally not invented because the approved handoff leaves those economy rules unspecified.
