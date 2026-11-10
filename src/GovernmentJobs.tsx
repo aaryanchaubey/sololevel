@@ -2,6 +2,8 @@ import {useState} from 'react';
 import type {GovernmentNotice} from './types';
 
 const sources=[
+ {name:'Employment News · All Jobs',url:'https://employmentnews.gov.in/NewEmp/AllJobs.aspx?k=All',note:'Government employment listings with dates and application details'},
+ {name:'National Career Service · Government vacancies',url:'https://www.ncs.gov.in/pages/govt-job-vacancies.aspx',note:'Government vacancy directory and official links'},
  {name:'UPSC active examinations',url:'https://cms.upsc.gov.in/active-examinations/',note:'Exam cycles and application dates'},
  {name:'UPSC recruitment advertisements',url:'https://cms.upsc.gov.in/advertisements/',note:'Direct recruitment advertisements'},
  {name:'Staff Selection Commission',url:'https://ssc.gov.in/',note:'Notices, exam calendar and applications'},

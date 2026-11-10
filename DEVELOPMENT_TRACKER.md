@@ -17,7 +17,7 @@
 | 2 | Fitness and recovery workflows | Implementation complete; manual browser QA remains |
 | 3 | Study, revision and planning | Implementation complete; date-boundary/manual browser QA remains |
 | 4 | Career and private-sector applications | Implementation complete; manual browser QA remains |
-| 5 | Nutrition and hydration | Core manual logging implemented; verified food data and recipe calculator remain |
+| 5 | Nutrition and hydration | IFCT 2017 sourced macro reference for 20 foods and custom estimates; recipe nutrient calculator and micronutrients remain |
 | 6 | Government recruitment discovery (last) | Manual official-source workflow implemented; verified automatic feed requires external source/service work |
 | 7 | Backup/security, analytics, accessibility and release verification | Core challenge/backup/security implementation; build, device QA and policy-dependent items remain |
 
@@ -32,7 +32,7 @@
 - [x] Local mission reflections, mission evidence records, weekly progress chart and milestone badges.
 - [x] Theme cycling, tier-based automatic theme default, local anime-inspired SVG backdrop and reduced-motion support.
 - [x] Basic local workspaces for Fitness, Study/Revision, Career, Nutrition, Hydration, Sleep, No FAP and Digital Discipline.
-- [x] Government page links to official UPSC, SSC, IBPS and RRB portals and can save user-entered notices locally.
+- [x] Government page links to Employment News, NCS, UPSC, SSC, IBPS and RRB official listings and can save user-entered notices locally.
 - [x] Optional local PIN gate using salted PBKDF2; PIN credentials are omitted from portable backups. This is an access gate, not database or file encryption.
 - [x] Weekly timestamped JSON backup attempt, manual export/import and reinstall caveat.
 - [x] Latest current check: `npm test` (11 tests pass, 10 November 2026). Previous build/audit results are historical; this handoff session has not rerun the build/audit.
@@ -94,7 +94,8 @@
 
 ## Phase 5 — Nutrition, hydration, No FAP and digital discipline
 
-- [ ] Nutrition: expand the small starter library into a verified Indian food set with cooked/raw distinction; current forms support gram portions, ingredients/oil/ghee and recipes. Starter values remain estimates, not a verified composition database.
+- [x] Replace unsourced presets with 20 cited IFCT 2017 Table 1 entries. The app displays code, sampled-region count, provenance and scales per-100 g macro values to serving grams.
+- [ ] Expand food coverage; calculate mixed-recipe nutrition by ingredient and servings; import cited micronutrients (calcium, iron, etc.) with confidence labels. The current dataset is intentionally partial and has no recipe calculator.
 - [ ] Add sourced micronutrients and confidence fields; custom source/provenance is retained.
 - [x] Support custom meals and preserve recipe/food provenance. The preset list remains a starter, not a complete food database.
 - [x] Hydration: configurable personal target, 150/250/500 ml quick-add, custom amounts, daily history and 7-day total. Do not force one universal target.
@@ -104,7 +105,7 @@
 
 ## Phase 6 — Government job discovery (must remain last)
 
-- [x] Provide direct links to official UPSC, SSC, IBPS and RRB source pages.
+- [x] Provide direct links to Employment News, NCS, UPSC, SSC, IBPS and RRB official source pages; notices are still manually saved and verified by the player.
 - [x] Allow a player to save a notice locally with authority, status, deadline, qualification and official links.
 - [x] Edit saved notice status, refresh its checked-at date and show deadline timing.
 - [ ] Add a reliable way to retrieve/aggregate active and upcoming notices, including checked-at date and source attribution, without fabricating vacancies.
