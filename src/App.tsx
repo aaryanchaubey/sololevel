@@ -192,6 +192,11 @@ export default function App() {
     "Not connected in this session",
   );
   const [adminOpen, setAdminOpen] = useState(false);
+  const [profileAdminLoginOpen, setProfileAdminLoginOpen] = useState(false);
+  const [profileAdminId, setProfileAdminId] = useState("");
+  const [profileAdminPassword, setProfileAdminPassword] = useState("");
+  const [profileAdminBusy, setProfileAdminBusy] = useState(false);
+  const [profileAdminError, setProfileAdminError] = useState("");
   const brandTapCount = useRef(0);
   const brandTapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const day = today();
@@ -887,6 +892,24 @@ export default function App() {
   }
   async function beginAdminLogin(id: string, password: string) {
     await signInCommunityAdmin(id, password);
+  }
+  async function loginFromProfile() {
+    setProfileAdminBusy(true);
+    setProfileAdminError("");
+    try {
+      await beginAdminLogin(profileAdminId, profileAdminPassword);
+      setProfileAdminPassword("");
+      setProfileAdminLoginOpen(false);
+      setAdminOpen(true);
+      setTab("Challenges");
+      setNotice("Admin session opened. Your player account remains signed in.");
+    } catch (error) {
+      setProfileAdminError(
+        error instanceof Error ? error.message : "Admin sign-in failed.",
+      );
+    } finally {
+      setProfileAdminBusy(false);
+    }
   }
   function handleBrandTap() {
     brandTapCount.current += 1;
@@ -2396,6 +2419,61 @@ export default function App() {
                   Delete all local data
                 </button>
               </div>
+              <section className="panel settings-card community-admin profile-admin-access">
+                <h2>Admin access</h2>
+                <p className="muted">
+                  Admin tools use a separate Firebase session. Signing in or out here does not sign out your player account.
+                </p>
+                {adminUser ? (
+                  <>
+                    <span className="account-status"><i /> Admin session active</span>
+                    <div className="button-row">
+                      <button className="primary" onClick={() => { setAdminOpen(true); setTab("Challenges"); }}>
+                        Open admin panel
+                      </button>
+                      <button className="danger" onClick={() => { void endAdminSession(); setTab("Profile"); }}>
+                        Admin logout
+                      </button>
+                    </div>
+                  </>
+                ) : profileAdminLoginOpen ? (
+                  <>
+                    <label className="field-label">
+                      Admin ID
+                      <input
+                        value={profileAdminId}
+                        onChange={(event) => setProfileAdminId(event.target.value)}
+                        autoComplete="username"
+                      />
+                    </label>
+                    <label className="field-label">
+                      Password
+                      <input
+                        type="password"
+                        value={profileAdminPassword}
+                        onChange={(event) => setProfileAdminPassword(event.target.value)}
+                        autoComplete="current-password"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") void loginFromProfile();
+                        }}
+                      />
+                    </label>
+                    {profileAdminError && <p className="pin-error">{profileAdminError}</p>}
+                    <div className="button-row">
+                      <button className="primary" disabled={profileAdminBusy} onClick={() => { void loginFromProfile(); }}>
+                        {profileAdminBusy ? "Signing in…" : "Sign in as admin"}
+                      </button>
+                      <button onClick={() => { setProfileAdminLoginOpen(false); setProfileAdminPassword(""); setProfileAdminError(""); }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button className="primary" onClick={() => setProfileAdminLoginOpen(true)}>
+                    Admin login
+                  </button>
+                )}
+              </section>
             </>
           )}
           <footer>
