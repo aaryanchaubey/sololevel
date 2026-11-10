@@ -448,7 +448,7 @@ export default function CommunityChallenges({
         </div>
       ) : rows.length === 0 ? (
         <div className="panel community-empty">
-          No approved challenges yet. Create one to start the community arena.
+          No live challenges yet. Create one to start the community arena.
         </div>
       ) : (
         <div className="community-list">
@@ -614,10 +614,10 @@ export default function CommunityChallenges({
         </div>
       )}
       <p className="community-integrity">
-        Challenges that pass moderation are visible to signed-in players. Names
-        use an automated language filter and can be reported; the filter is not
-        perfect. Check-ins are user-reported. Do not use this board for prizes
-        or health claims.
+        New challenges are visible to signed-in players immediately. Names use
+        an automated language filter and can be reported; the filter is not
+        perfect. Admins may remove reported challenges. Check-ins are
+        user-reported. Do not use this board for prizes or health claims.
       </p>
     </section>
   );
