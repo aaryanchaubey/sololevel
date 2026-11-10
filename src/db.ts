@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
 import type { AppData } from "./types";
+import { archiveCompletedMonths } from "./monthlyArchive";
 class SoloLevelingDB extends Dexie {
   state!: Table<{ id: string; data: AppData }, string>;
   constructor() {
@@ -31,6 +32,9 @@ export const DEFAULT_DATA: AppData = {
     lifetimeXp: 0,
     availableXp: 0,
     level: 1,
+    age: undefined,
+    avatarId: "⚔️",
+    accountType: "guest",
   },
   settings: {
     theme: "shadow",
@@ -76,6 +80,7 @@ export const DEFAULT_DATA: AppData = {
   challenges: [],
   personalChallenges: [],
   personalChallengeLogs: [],
+  monthlySummaries: [],
   missions: [],
   inventory: [],
   achievements: [],
@@ -92,6 +97,10 @@ export async function loadAppData(): Promise<AppData> {
   data.modules = { ...DEFAULT_MODULES, ...data.modules };
   data.personalChallenges ??= [];
   data.personalChallengeLogs ??= [];
+  if (!data.monthlySummaries) {
+    data.monthlySummaries = [];
+    changed = true;
+  }
   if (data.profile.availableXp === undefined) {
     data.profile.availableXp = data.profile.lifetimeXp;
     changed = true;
@@ -103,14 +112,25 @@ export async function loadAppData(): Promise<AppData> {
     data.settings.sleepTargetHours = 6;
     changed = true;
   }
+  const archivedData = archiveCompletedMonths(data, localToday());
+  if (archivedData !== data) {
+    Object.assign(data, archivedData);
+    changed = true;
+  }
   if (
     changed ||
     !row.data.modules ||
     !row.data.personalChallenges ||
-    !row.data.personalChallengeLogs
+    !row.data.personalChallengeLogs ||
+    !row.data.monthlySummaries
   )
     await db.state.put({ id: "main", data });
   return data;
+}
+
+function localToday() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 export async function saveAppData(data: AppData) {
   await db.state.put({ id: "main", data });

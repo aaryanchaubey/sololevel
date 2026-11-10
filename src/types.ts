@@ -98,6 +98,39 @@ export interface AppProfile {
   lifetimeXp: number;
   availableXp?: number;
   level: number;
+  age?: number;
+  avatarId?: string;
+  accountType?: "guest" | "google";
+  accountEmail?: string;
+  googleUid?: string;
+}
+export interface MonthlySummary {
+  month: string;
+  missionCompletions: number;
+  missionMisses: number;
+  xpEarned: number;
+  workoutDays: number;
+  workoutEntries: number;
+  workoutVolumeKgReps: number;
+  studyMinutes: number;
+  studySessions: number;
+  foodEntries: number;
+  calories: number;
+  proteinGrams: number;
+  waterMl: number;
+  waterEntries: number;
+  sleepHours: number;
+  sleepEntries: number;
+  bodyWeightFirstKg?: number;
+  bodyWeightLastKg?: number;
+  bodyWeightFirstDate?: string;
+  bodyWeightLastDate?: string;
+  selfControlEntries: number;
+  selfControlOutcomes: Record<string, number>;
+  digitalEntries: number;
+  digitalOutcomes: Record<string, number>;
+  personalChallengeCheckins: number;
+  archivedAt: string;
 }
 export interface WorkoutEntry {
   id: string;
@@ -245,5 +278,6 @@ export interface AppData {
   missions: MissionLog[];
   inventory: InventoryItem[];
   achievements: string[];
+  monthlySummaries?: MonthlySummary[];
   modules?: AppModules;
 }

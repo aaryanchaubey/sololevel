@@ -275,7 +275,7 @@ export default function RecipeCalculator({ date, onSave }: Props) {
         </a>
       </p>
       <button
-        className="primary"
+        className="primary recipe-save"
         type="button"
         onClick={save}
         disabled={!valid}

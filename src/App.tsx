@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
+  ArrowLeft,
   Archive,
   BookOpen,
   BriefcaseBusiness,
@@ -54,6 +55,7 @@ import {
   signOutGoogle,
 } from "./firebaseAuth";
 import type { User } from "firebase/auth";
+import StepMap from "./StepMap";
 import {
   downloadGoogleDriveBackup,
   googleSyncIsConfigured,
@@ -119,7 +121,7 @@ const missions: {
   },
   {
     id: "digital",
-    title: "No Porn or Short Videos",
+    title: "Adult Content & Reels",
     desc: "Avoid intentional porn, Instagram Reels, and YouTube Shorts. Accidental exposure is fine.",
     category: "discipline",
     icon: LockKeyhole,
@@ -135,7 +137,7 @@ const shopItems = [
       "Excuse one mission marked missed during an active 21-day challenge. It never counts as a completion.",
     kind: "recovery_skip" as const,
     target: "any" as const,
-    price: 300,
+    price: 1200,
   },
   {
     id: "mission-booster",
@@ -143,7 +145,7 @@ const shopItems = [
     description: "Add 50% bonus XP to your next newly completed main mission.",
     kind: "booster" as const,
     target: "any" as const,
-    price: 200,
+    price: 1000,
   },
 ];
 const themes = [
@@ -156,6 +158,14 @@ const themes = [
   "frost",
   "emerald",
   "solar",
+];
+const profileAvatars = [
+  "⚔️", "🛡️", "🗡️", "🏹", "🦊", "🐺", "🦅", "🐉", "🦁", "🐯",
+  "🐻", "🦉", "🐈‍⬛", "🦈", "🐍", "🦂", "🦇", "🦖", "🐗", "🦌",
+  "🐸", "🐼", "🐵", "🦄", "🐙", "🦋", "🪼", "🦚", "🦜", "🐢",
+  "🌙", "☀️", "🌌", "⚡", "🔥", "❄️", "🌊", "🌪️", "🌿", "🌸",
+  "💎", "👑", "🧿", "🔮", "🪬", "🎭", "🦾", "🤖", "👽", "👻",
+  "🥷", "🧙", "🧛", "🧝", "🧞", "🧟", "🦸", "🦹", "🎴", "🏆",
 ];
 const today = () => {
   const d = new Date();
@@ -178,6 +188,7 @@ export default function App() {
   const [googleUser, setGoogleUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(!firebaseAuthIsConfigured);
   const [authBusy, setAuthBusy] = useState(false);
+  const [selectedSummaryMonth, setSelectedSummaryMonth] = useState("");
   const [name, setName] = useState("Player");
   const [showRestore, setShowRestore] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
@@ -196,24 +207,6 @@ export default function App() {
     return listenForGoogleUser((user) => {
       setGoogleUser(user);
       setAuthReady(true);
-      if (user) {
-        setShowWelcome(false);
-        setName((currentName) =>
-          currentName === "Player"
-            ? user.displayName || user.email || "Player"
-            : currentName,
-        );
-        setData((current) => ({
-          ...current,
-          profile: {
-            ...current.profile,
-            displayName:
-              current.profile.displayName === "Player"
-                ? user.displayName || user.email || "Player"
-                : current.profile.displayName,
-          },
-        }));
-      }
     });
   }, []);
   useEffect(() => {
@@ -242,6 +235,39 @@ export default function App() {
         );
       });
   }, []);
+  useEffect(() => {
+    if (!ready || !authReady) return;
+    const signedInName = googleUser?.displayName || googleUser?.email || "Player";
+    if (googleUser && data.profile.displayName === "Player")
+      setName(signedInName);
+    setData((current) => {
+      const profile = googleUser
+        ? {
+            ...current.profile,
+            accountType: "google" as const,
+            googleUid: googleUser.uid,
+            accountEmail: googleUser.email ?? undefined,
+            displayName:
+              current.profile.displayName === "Player"
+                ? googleUser.displayName || googleUser.email || "Player"
+                : current.profile.displayName,
+          }
+        : {
+            ...current.profile,
+            accountType: "guest" as const,
+            googleUid: undefined,
+            accountEmail: undefined,
+          };
+      if (
+        profile.accountType === current.profile.accountType &&
+        profile.googleUid === current.profile.googleUid &&
+        profile.accountEmail === current.profile.accountEmail &&
+        profile.displayName === current.profile.displayName
+      ) return current;
+      return { ...current, profile };
+    });
+    if (googleUser) setShowWelcome(false);
+  }, [googleUser, authReady, ready, data.profile.displayName]);
   useEffect(() => {
     if (!ready) return;
     setSaveStatus("saving");
@@ -413,6 +439,19 @@ export default function App() {
   const challengeFocus =
     data.settings.dashboardChallengeFocus ??
     (activePersonalChallenge ? "personal" : "main");
+  const profileChallenge =
+    data.activeChallenge?.status === "active"
+      ? data.activeChallenge
+      : data.challenges
+          .slice()
+          .sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+  const monthlySummaries = (data.monthlySummaries ?? []).slice().sort((a, b) =>
+    b.month.localeCompare(a.month),
+  );
+  const selectedMonthSummary =
+    monthlySummaries.find(
+      (summary) => summary.month === (selectedSummaryMonth || monthlySummaries[0]?.month),
+    ) ?? monthlySummaries[0];
   useEffect(() => {
     if (
       !ready ||
@@ -1207,12 +1246,13 @@ export default function App() {
           <button
             className="player-chip profile-trigger"
             type="button"
-            title="Profile & settings"
+            title={data.profile.accountType === "google" ? "Google account connected · Open profile" : "Open profile and settings"}
             aria-label="Open profile and settings"
             onClick={() => setTab("Profile")}
           >
-            <div className="avatar">
-              {data.profile.displayName.slice(0, 1).toUpperCase()}
+            <div className="avatar avatar-emoji" aria-hidden="true">
+              {data.profile.avatarId || profileAvatars[0]}
+              {data.profile.accountType === "google" && <i className="google-avatar-dot" />}
             </div>
             <span>{data.profile.displayName}</span>
           </button>
@@ -1589,8 +1629,8 @@ export default function App() {
           {tab === "Quests" &&
             (activeModule === "government" ? (
               <>
-                <button onClick={() => setActiveModule(null)}>
-                  ← Back to Quests
+                <button className="round-back government-back" type="button" onClick={() => setActiveModule(null)} aria-label="Back" title="Back">
+                  <ArrowLeft size={18} />
                 </button>
                 <GovernmentJobs
                   notices={data.modules?.governmentNotices ?? []}
@@ -1683,6 +1723,54 @@ export default function App() {
             <>
               <p className="eyebrow">PLAYER RECORD</p>
               <h1>Progress & ranks</h1>
+              <section className="panel monthly-summary">
+                <div className="section-head">
+                  <div>
+                    <p className="eyebrow">LONG-TERM RECORD</p>
+                    <h2>Monthly summary</h2>
+                  </div>
+                  {monthlySummaries.length > 0 && (
+                    <label className="month-select">
+                      <span className="sr-only">Choose summary month</span>
+                      <select
+                        value={selectedMonthSummary?.month ?? ""}
+                        onChange={(event) =>
+                          setSelectedSummaryMonth(event.target.value)
+                        }
+                      >
+                        {monthlySummaries.map((summary) => (
+                          <option key={summary.month} value={summary.month}>
+                            {new Date(`${summary.month}-15T12:00:00`).toLocaleDateString(undefined, {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
+                {selectedMonthSummary ? (
+                  <>
+                    <p className="muted">
+                      Individual daily records for completed months are compacted into these totals. Current-month data stays detailed.
+                    </p>
+                    <div className="summary-metric-grid">
+                      <div><span>QUESTS COMPLETED</span><b>{selectedMonthSummary.missionCompletions}</b><small>{selectedMonthSummary.missionMisses} missed</small></div>
+                      <div><span>XP EARNED</span><b>{selectedMonthSummary.xpEarned.toLocaleString()}</b><small>From completed quests</small></div>
+                      <div><span>FITNESS</span><b>{selectedMonthSummary.workoutDays} days</b><small>{selectedMonthSummary.workoutEntries} exercise entries · {Math.round(selectedMonthSummary.workoutVolumeKgReps).toLocaleString()} kg-reps</small></div>
+                      <div><span>FOCUSED STUDY</span><b>{Math.floor(selectedMonthSummary.studyMinutes / 60)}h {selectedMonthSummary.studyMinutes % 60}m</b><small>Logged study time</small></div>
+                      <div><span>NUTRITION</span><b>{Math.round(selectedMonthSummary.calories).toLocaleString()} kcal</b><small>{selectedMonthSummary.foodEntries} food entries · {Math.round(selectedMonthSummary.proteinGrams)} g protein</small></div>
+                      <div><span>RECOVERY & WATER</span><b>{selectedMonthSummary.sleepHours.toFixed(1)}h sleep</b><small>{Math.round(selectedMonthSummary.waterMl / 1000)} L water logged</small></div>
+                      {selectedMonthSummary.bodyWeightFirstKg !== undefined && selectedMonthSummary.bodyWeightLastKg !== undefined && (
+                        <div><span>BODY WEIGHT</span><b>{selectedMonthSummary.bodyWeightLastKg} kg</b><small>{selectedMonthSummary.bodyWeightFirstKg} kg → {selectedMonthSummary.bodyWeightLastKg} kg in that month</small></div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="muted">Monthly summaries appear here after the calendar moves into a new month. Detailed logs for the current month remain available in each module.</p>
+                )}
+              </section>
               <div className="rank-detail-grid">
                 {categories.map((c) => (
                   <div className="panel rank-detail" key={c}>
@@ -1890,40 +1978,41 @@ export default function App() {
             <>
               <p className="eyebrow">PLAYER CONFIGURATION</p>
               <h1>Profile & settings</h1>
+              <StepMap startDate={profileChallenge?.startDate} missions={data.missions} />
               <div className="panel settings-card">
                 <h2>Account</h2>
                 {googleUser ? (
                   <>
                     <p>
-                      Signed in with Google as <b>{googleUser.email}</b>
+                      <span className="account-status"><i /> Google account connected</span><br />
+                      {googleUser.displayName && <b>{googleUser.displayName} · </b>}
+                      <b>{googleUser.email}</b>
                     </p>
                     <p className="muted">
-                      Your game progress stays on this device. Use Drive backup
-                      below to move a snapshot to another device.
+                      Google sign-in is active, not guest mode. Your progress remains local to this device; use a backup to transfer it.
                     </p>
                     <button
                       className="danger"
                       disabled={authBusy}
                       onClick={logOutGoogle}
                     >
-                      {authBusy ? "Signing out…" : "Log out"}
+                      {authBusy ? "Signing out…" : "Log out of Google"}
                     </button>
                   </>
                 ) : (
                   <>
                     <p className="muted">
-                      You’re using a local guest profile. Sign in with Google
-                      to identify this account; your existing local progress is
-                      kept as-is.
+                      Guest profile · your progress is saved locally on this device.
                     </p>
                     {firebaseAuthIsConfigured ? (
-                      <button
-                        className="primary"
-                        disabled={authBusy}
-                        onClick={beginGoogleLogin}
-                      >
-                        {authBusy ? "Connecting…" : "Sign in with Google"}
-                      </button>
+                      <div className="button-row">
+                        <button className="primary" disabled={authBusy} onClick={beginGoogleLogin}>
+                          {authBusy ? "Connecting…" : "Sign in with Google"}
+                        </button>
+                        <button className="logout-link" disabled={authBusy} onClick={logOutGoogle}>
+                          Log out of guest profile
+                        </button>
+                      </div>
                     ) : (
                       <div className="warning inline-warning">
                         <ShieldAlert />
@@ -1935,6 +2024,59 @@ export default function App() {
                     )}
                   </>
                 )}
+              </div>
+              <div className="panel settings-card profile-details">
+                <h2>Player details</h2>
+                <label className="field-label">
+                  Display name
+                  <input
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    onBlur={() => setData({
+                      ...data,
+                      profile: { ...data.profile, displayName: name.trim() || "Player" },
+                    })}
+                  />
+                </label>
+                <label className="field-label">
+                  Age <span className="muted inline-hint">Google does not share age automatically</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    inputMode="numeric"
+                    placeholder="Optional"
+                    value={data.profile.age ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setData({
+                        ...data,
+                        profile: {
+                          ...data.profile,
+                          age: value === "" ? undefined : Math.max(1, Math.min(120, Number(value))),
+                        },
+                      });
+                    }}
+                  />
+                </label>
+                <div className="avatar-picker-section">
+                  <div className="section-head">
+                    <div><h3>Choose your avatar</h3><p className="muted">60 illustrated-style icons · saved on this device</p></div>
+                    <span className="avatar-large">{data.profile.avatarId || profileAvatars[0]}</span>
+                  </div>
+                  <div className="avatar-picker">
+                    {profileAvatars.map((avatar, index) => (
+                      <button
+                        type="button"
+                        key={`${avatar}-${index}`}
+                        className={data.profile.avatarId === avatar ? "avatar-option selected" : "avatar-option"}
+                        aria-label={`Select avatar ${index + 1}: ${avatar}`}
+                        aria-pressed={data.profile.avatarId === avatar}
+                        onClick={() => setData({ ...data, profile: { ...data.profile, avatarId: avatar } })}
+                      >{avatar}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="panel settings-card">
                 <h2>Local data & backup</h2>
@@ -2014,22 +2156,6 @@ export default function App() {
               </div>
               <div className="panel settings-card">
                 <h2>Player preferences</h2>
-                <label className="field-label">
-                  Display name
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onBlur={() =>
-                      setData({
-                        ...data,
-                        profile: {
-                          ...data.profile,
-                          displayName: name.trim() || "Player",
-                        },
-                      })
-                    }
-                  />
-                </label>
                 <label className="field-label">
                   Sleep target
                   <select

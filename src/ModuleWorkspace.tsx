@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import type { AppModules, ReflectionEntry } from "./types";
 import RecipeCalculator from "./RecipeCalculator";
@@ -485,6 +486,15 @@ export default function ModuleWorkspace({
     ) : (
       <p className="muted">Nothing recorded yet.</p>
     );
+  const workoutDays = Array.from(
+    new Set(modules.workouts.map((entry) => entry.date)),
+  )
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, 14)
+    .map((date) => ({
+      date,
+      exercises: modules.workouts.filter((entry) => entry.date === date),
+    }));
   return (
     <section className="module-workspace">
       <div className="section-head">
@@ -492,15 +502,16 @@ export default function ModuleWorkspace({
           <p className="eyebrow">PLAYER MODULE</p>
           <h1>{names[moduleId] ?? "Personal module"}</h1>
         </div>
-        <button onClick={onBack}>← Back to Quests</button>
+        <button className="round-back" type="button" onClick={onBack} aria-label="Back" title="Back">
+          <ArrowLeft size={18} />
+        </button>
       </div>
       {moduleId === "fitness" && (
         <>
           <div className="panel module-form">
-            <h2>Log today training</h2>
+            <h2>Today’s training</h2>
             <p className="muted">
-              Log several exercises into one daily training record. Gym sets and
-              cardio distance have separate quick forms.
+              Add exercises to one day-wise workout log. Entries for today stay grouped together.
             </p>
             <div
               className="activity-quick-picks"
@@ -644,7 +655,7 @@ export default function ModuleWorkspace({
             </div>
             {field("Notes", notes, setNotes)}
             <button className="primary" onClick={addWorkout}>
-              Save session
+              Add to today’s log
             </button>
           </div>
           <div className="panel">
@@ -734,21 +745,26 @@ export default function ModuleWorkspace({
               <span>{x.date}</span>
             </>
           ))}
-          {records(modules.workouts, (x) => (
-            <>
-              <b>
-                {x.activity}: {x.exercise}
-              </b>
-              <span>
-                {x.sets > 0
-                  ? `${x.muscleGroup ?? "General"} · ${x.sets} × ${x.reps} · ${x.weightKg} kg · ${x.setType ?? "Working"} · RPE ${x.rpe ?? "-"} · RIR ${x.rir ?? "-"}`
-                  : `${x.activity} session`}
-                {x.durationMinutes ? ` · ${x.durationMinutes} min` : ""}
-                {x.distanceKm ? ` · ${x.distanceKm} km` : ""} · {x.date}
-              </span>
-              {x.notes && <small>{x.notes}</small>}
-            </>
-          ))}
+          <section className="workout-day-list">
+            <h2>Workout log by day</h2>
+            {workoutDays.length ? workoutDays.map(({ date, exercises }) => (
+              <article className="panel workout-day-card" key={date}>
+                <div className="workout-day-heading">
+                  <b>{date === today() ? "Today" : new Date(`${date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</b>
+                  <span>{exercises.length} {exercises.length === 1 ? "exercise" : "exercises"}</span>
+                </div>
+                <div className="workout-exercise-list">
+                  {exercises.map((entry) => (
+                    <div className="workout-exercise" key={entry.id}>
+                      <div><b>{entry.activity === "Gym" ? entry.exercise : entry.activity}</b><small>{entry.activity === "Gym" ? entry.muscleGroup ?? "General" : entry.durationMinutes ? `${entry.durationMinutes} min` : "Activity"}{entry.distanceKm ? ` · ${entry.distanceKm} km` : ""}</small></div>
+                      {entry.sets > 0 && <span>{entry.sets} × {entry.reps} · {entry.weightKg} kg</span>}
+                      {entry.notes && <small className="exercise-notes">{entry.notes}</small>}
+                    </div>
+                  ))}
+                </div>
+              </article>
+            )) : <p className="muted">Your daily exercise logs will appear here, grouped by day.</p>}
+          </section>
         </>
       )}
       {moduleId === "study" && (
@@ -1219,7 +1235,7 @@ export default function ModuleWorkspace({
                 of your serving.
               </small>
             )}
-            <button className="primary" onClick={addFood}>
+            <button className="primary nutrition-save" onClick={addFood}>
               Save food
             </button>
           </div>
