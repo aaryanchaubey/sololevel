@@ -1,9 +1,10 @@
 # Solo Leveling V1 — Codex Handoff and Implementation Brief
 
-**Status:** Phase 1 foundation is in place; approved V1 implementation remains in progress and incomplete. This document is the product source of truth for continuing work in this repository. It is a handoff brief, not a claim that the application is finished.
+**Status:** Core local features are implemented through Phases 1–5, with security/challenge work in Phase 7. Final build and browser/device QA remain. Verified automatic government notices and authoritative nutrition data are not yet available. This document is the product source of truth for continuing work in this repository; it does not claim the app is finished.
 
 **Project:** `D:\Startup\SoloLevel\solo-leveling-v1`  
-**Reviewed:** 9 November 2026  
+**Reviewed:** 10 November 2026
+
 **Existing foundation:** React 18, TypeScript, Vite, Dexie/IndexedDB, Vite PWA plugin. See `package.json`, `README.md`, `src/`, and `vite.config.ts` before making changes.
 
 ## 1. Instructions to Codex before editing
@@ -185,15 +186,16 @@ Reviewed files include `package.json`, `README.md`, `src/App.tsx`, `src/types.ts
 This snapshot includes a successful production build and focused unit-test run, but not full browser QA. Do not call existing foundations complete merely because a control/card is visible.
 
 
-### Current implementation status (9 November 2026)
+### Current implementation status (10 November 2026)
 
-- `npm test` passes five challenge-engine tests; `npm run build` passes and generates the PWA service worker.
-- The welcome data warning, IndexedDB, JSON export/import, timestamped weekly folder-backup attempt, theme cycle, anime-inspired SVG background, reduced-motion-aware animations, local achievement milestones and weekly mission bar chart are present.
-- Seven mission names/descriptions now reflect the current user-approved rules: No FAP; gym Monday–Saturday and rest/meditation Sunday; career/openings; six-hour sleep goal; three-hour study; revision/next-day planning; and no intentional porn/Reels/Shorts, with accidental exposure allowed.
-- Local record forms exist for Fitness, Study/Revision, Career, Nutrition, Hydration, Sleep, No FAP and Digital Discipline. The daily mission list has seven goals, with Sleep & Recovery as one six-hour goal; mission self-report does not require module evidence. The Fitness mission is one per day, with Sunday meditation substitution. Completed missions show struck-through text and one correction cross; XP is adjusted by the status delta. Missed tasks have a reflection prompt. Recovery skips can be spent on an eligible mission during an active challenge.
-- The Government Jobs page is the final module in the Quests list. It links to official UPSC, SSC, IBPS and RRB pages and saves user-entered notices locally. Automated retrieval/verification is not implemented; do not describe these as live in-app aggregated alerts.
-- The product is not complete. Reminder scheduling only works while the app is open; there is no background push server. Study sessions and revision have basic forms but no complete spaced-repetition engine. Nutrition uses user-entered estimates, not an Indian food database/calculator. Fitness/career flows need deeper reporting and record management. The optional local PIN is implemented as an access gate using a salted PBKDF2 hash; it does not encrypt local data. Encrypted backups are not implemented. Government notices are manually saved from official sites; automated retrieval/verification is not implemented. Expand backup validation/migrations, analytics/history, accessibility and PWA restore checks. Keep any network aggregator transparent and never fabricate a notice.
-- `npm audit --omit=dev --audit-level=high` reports zero production vulnerabilities. Full development-tool audit still reports moderate findings in the PWA build dependency chain; production dependencies audit clean. Reassess before forcing dependency changes.
+- `npm test` passes 11 tests across challenge progression and local PIN behavior. The user requested to run the final production build manually; do not claim a current build result until they provide it.
+- Local IndexedDB, weekly timestamped folder backups, manual JSON export/import, payload validation, SHA-256 integrity checks, and optional password-encrypted AES-GCM backups are implemented. Encrypted backups use PBKDF2-SHA-256 and require the user to retain the password. The local PIN remains only an access gate. Browser round-trip, folder-permission and reinstall restore QA remain.
+- Seven approved missions, status correction and XP delta handling, four independent rank ladders, 21-day challenge history/progress, category counters and 80% threshold display are implemented. Scoring compares the exact ratio, not its rounded display. Recovery skips are limited to already-missed tasks within the active challenge and preserve the missed origin. Automated tests cover calendar boundaries, category independence, threshold math, rank-boundary streaks, duplicate rows and skip scoring. Manual UI QA remains.
+- Fitness, sleep, study/revision, career, hydration, food estimate and private No FAP/digital discipline workspaces are implemented locally. Food presets remain a small estimate set; no verified complete Indian food dataset, recipe nutrient calculator or sourced micronutrients are claimed. Some module records offer status changes while full edit/delete workflows and browser QA remain incomplete.
+- Government jobs is still last in the user workflow. Official UPSC, SSC, IBPS and RRB links, locally saved notices, checked-at dates, status, deadlines and eligibility notes are available. There is no automatic official feed or verified aggregator. The repository has no deployed backend; do not scrape cross-origin pages or fabricate notices. A trusted official feed and hosting choice are required before this item can be marked complete.
+- Browser notifications honor configured quiet hours but run only while the app is open; background reminders require later platform/service-worker work. Theme cycling, automatic highest-rank theme, dark fantasy visuals and reduced-motion styling are present. Global leaderboard/cloud sync remain intentionally deferred.
+- Unspecified task-booster award rates, cap, effect and expiry remain intentionally unimplemented, per the fixed product rules above. Database schema is still version 1; module defaults support older local payloads, but formal Dexie schema migrations and round-trip migration tests remain.
+- Production build, accessibility/mobile/install/offline testing, folder restore simulation, development/production audit, and user browser/device QA are still outstanding. Keep the tracker current and do not label the application complete until those checks and the external feed/data requirements are resolved.
 ## 12. Development phases
 
 **Phase 0 — Baseline and safety.** Inspect git/worktree status, files, current build/type errors, data model and routes/components. Record existing behavior. Add test tooling appropriate to the codebase without removing current dependencies. Preserve uncommitted work and existing user records.

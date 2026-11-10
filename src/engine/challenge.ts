@@ -18,7 +18,12 @@ export function scoreCategory(data:AppData,challenge:Challenge,category:Category
   if(row?.status==='complete')earned+=1;
  }
  const percentage=possible?Math.round(earned/possible*100):0;
- return {earned,possible,percentage,passed:possible>0&&percentage>=80};
+ return {earned,possible,percentage,passed:possible>0&&earned/possible>=0.8};
+}
+
+export function scoreCategoryToDate(data:AppData,challenge:Challenge,category:Category,asOf:string){
+ if(asOf<challenge.startDate)return {earned:0,possible:0,percentage:0,passed:false};
+ return scoreCategory(data,{...challenge,endDate:asOf<challenge.endDate?asOf:challenge.endDate},category);
 }
 
 export function nextTier(tier:Tier):Tier{const ri=RANKS.indexOf(tier.rank);if(tier.level===3)return {rank:tier.rank,level:2};if(tier.level===2)return {rank:tier.rank,level:1};if(ri===RANKS.length-1)return tier;return {rank:RANKS[ri+1],level:3};}
@@ -33,6 +38,7 @@ export function applyCategoryResult(data:AppData,category:Category,passed:boolea
 
 export function evaluateChallenge(data:AppData,challenge:Challenge){
  if(challenge.status!=='active'||data.challenges.some(c=>c.id===challenge.id))throw new Error('This challenge has already been evaluated.');
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(challenge.startDate)||challenge.endDate!==challengeEnd(challenge.startDate))throw new Error('A challenge must span exactly 21 calendar days.');
  const today=new Date();const todayLocal=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
  if(challenge.endDate>todayLocal)throw new Error('This 21-day challenge is still in progress.');
  const results={} as NonNullable<Challenge['categoryResults']>;
