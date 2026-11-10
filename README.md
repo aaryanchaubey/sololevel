@@ -177,7 +177,7 @@ The leaderboard uses the existing Firebase Authentication identity and a Firesto
 3. Choose **Production mode** and an appropriate region. Keep the app on the free Spark plan; do not enable billing for this setup.
 4. Wait until the database is ready. Do not add permissive test rules.
 
-### 2. Deploy the repository's restricted rules
+### 2. Deploy the repository's restricted rules and indexes
 
 From the repository folder, sign in to Firebase CLI if needed and deploy only the checked-in Firestore rules:
 
@@ -186,7 +186,7 @@ npx firebase-tools login
 npx firebase-tools deploy --only firestore --project YOUR_FIREBASE_PROJECT_ID
 ```
 
-Replace `YOUR_FIREBASE_PROJECT_ID` with the Firebase project ID (not an API key). The project config is in your local `.env.local`; it is not committed. This deploys both [firestore.rules](./firestore.rules) and [firestore.indexes.json](./firestore.indexes.json). The rules restrict leaderboard ownership, require auth for community operations, allow only server-provisioned admin UIDs, and keep private logs outside the remote collections.
+Replace `YOUR_FIREBASE_PROJECT_ID` with the Firebase project ID (not an API key). The project config is in your local `.env.local`; it is not committed. This deploys both [firestore.rules](./firestore.rules) and [firestore.indexes.json](./firestore.indexes.json), including the collection-group `participants.uid` index used by community challenge membership. The rules restrict leaderboard ownership, require auth for community operations, allow only server-provisioned admin UIDs, and keep private logs outside the remote collections.
 
 ### 3. Use the board
 
@@ -276,7 +276,7 @@ src/
 tests/                      Vitest engine/security tests
 public/                     PWA icon and journey artwork
 firestore.rules             Authenticated leaderboard, community and admin allowlist rules
-firestore.indexes.json      Composite Firestore indexes for community/admin review lists
+firestore.indexes.json      Composite and collection-group indexes for community queries
 firebase.json               Firebase CLI rules file mapping
 netlify.toml                Netlify SPA build and redirect configuration
 ```
@@ -337,6 +337,10 @@ Verify Firebase Authentication has Google enabled, the current origin is authori
 ### Leaderboard says it could not load or publish
 
 Confirm the Firestore database exists, the app uses the same Firebase project as Authentication, the logged-in account is Google-authenticated, and `firestore.rules` has been deployed. Keep production mode/rules strict. Do not switch to public unauthenticated read/write rules. Check the browser console and Firebase rules diagnostics for the exact permission error.
+
+### Global challenges says an index is required
+
+Deploy the checked-in Firestore indexes with `npx firebase-tools deploy --only firestore:indexes --project YOUR_FIREBASE_PROJECT_ID`. Firestore may need time to finish building a newly deployed index; retry the query after its index state is ready in the Firebase console.
 
 ### Drive backup is unavailable
 
