@@ -190,3 +190,13 @@ button:not(:disabled):hover:not(:active){transform:translateY(-1px)}
 .module-grid .module-button:nth-child(4n){--realm-glow:#7de0ae}
 @media(max-width:620px){.module-grid .module-button:hover{transform:none}.module-grid .module-button:active{transform:scale(.98);box-shadow:0 10px 26px #0009}}
 @media(prefers-reduced-motion:reduce){.module-grid .module-button,.module-grid .module-button::before,.module-grid .module-button::after,.module-grid .module-button svg{transition:none}}
+.realm-workspace{position:relative;isolation:isolate;--realm-glow:var(--accent);animation:realm-arrive .24s cubic-bezier(.2,.8,.2,1) both}
+.realm-workspace::before{content:"";position:absolute;z-index:-1;top:-55px;right:4%;width:min(38vw,390px);height:240px;border-radius:50%;background:radial-gradient(ellipse,var(--realm-glow,#a99aff2d),transparent 70%);opacity:.2;pointer-events:none;filter:blur(8px)}
+.realm-header{position:relative;min-height:100px;margin:0 0 18px;padding:14px 18px;border:1px solid color-mix(in srgb,var(--realm-glow) 24%,var(--line));border-radius:16px;background:linear-gradient(105deg,color-mix(in srgb,var(--realm-glow) 10%,var(--panel)),color-mix(in srgb,var(--panel) 88%,transparent));box-shadow:0 12px 28px #0003,inset 0 1px #ffffff12;overflow:hidden}
+.realm-header::after{content:"";position:absolute;right:68px;top:-50px;width:120px;height:190px;border:1px solid color-mix(in srgb,var(--realm-glow) 20%,transparent);border-radius:50%;transform:rotate(32deg);pointer-events:none}
+.realm-header .eyebrow{color:var(--realm-glow)}
+.realm-header h1{position:relative;z-index:1;text-shadow:0 0 28px color-mix(in srgb,var(--realm-glow) 25%,transparent)}
+.realm-fitness{--realm-glow:#75d5ff}.realm-study{--realm-glow:#bea1ff}.realm-career{--realm-glow:#ffbd70}.realm-nutrition{--realm-glow:#87dfa8}.realm-hydration{--realm-glow:#78d9ff}.realm-sleep{--realm-glow:#a9a1ff}.realm-self_control{--realm-glow:#f0a2bd}.realm-digital{--realm-glow:#a9e99a}
+.realm-workspace .module-form{border-color:color-mix(in srgb,var(--realm-glow) 23%,var(--line));box-shadow:0 14px 30px #0002,inset 0 1px #ffffff0a}
+@keyframes realm-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.realm-workspace{animation:none}}

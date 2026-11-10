@@ -2,7 +2,7 @@
 
 This roadmap tracks the visual and interaction upgrade in three phases. Existing mission, challenge, XP, rank, and storage rules remain authoritative; visual work must not silently change them.
 
-## Phase 1 — 21-Day Journey Map (in progress)
+## Phase 1 — 21-Day Journey Map (complete)
 
 - Replace the background illustration that had baked-in lettering with clean, original environment art.
 - Place an original climbing character on the player's current challenge day. Before a challenge starts, the character waits on Day 1.
@@ -12,7 +12,9 @@ This roadmap tracks the visual and interaction upgrade in three phases. Existing
 
 **Acceptance:** all 21 steps render; the character follows the actual challenge day; tapping a step updates its detail strip; the map has no duplicate/baked-in text; small screens remain readable; no mission or challenge data is changed by viewing the map.
 
-## Phase 2 — Interactive Realms (starter styling in progress)
+**Delivered in the current checkpoint:** responsive 21-step map, clean text-free background, compressed character sprite bound to the actual day, selectable day details, reduced-motion support, and depth styling. The production build is passing.
+
+## Phase 2 — Interactive Realms (in progress)
 
 Turn existing modules into destinations with consistent motion, visual depth, and meaningful entry feedback. Start with the current quest-module launcher; extend the same patterns to Home and Progress.
 
@@ -22,6 +24,8 @@ Turn existing modules into destinations with consistent motion, visual depth, an
 - Recovery Sanctuary: make sleep, hydration, and nutrition actions feel like one calm, supportive area.
 - Discipline Gate: keep No FAP and Adult Content & Reels tracking private and free of shame-based scoring copy.
 - Use fast transform/opacity transitions, distinct realm accents, and touch feedback. Every destination remains a normal accessible button.
+
+**Delivered so far:** module portal cards now have distinct accent glows, hover depth, touch feedback, and keyboard focus support. Module workspaces get a realm accent, entry transition, and subtle ambient lighting. The existing module actions and storage remain unchanged.
 
 **Acceptance:** each destination still opens its existing module; all existing save/log actions behave as before; motion is brief and disabled or reduced when requested by the device; effects do not block taps or reduce text contrast.
 

@@ -496,8 +496,8 @@ export default function ModuleWorkspace({
       exercises: modules.workouts.filter((entry) => entry.date === date),
     }));
   return (
-    <section className="module-workspace">
-      <div className="section-head">
+    <section className={`module-workspace realm-workspace realm-${moduleId}`}>
+      <div className="section-head realm-header">
         <div>
           <p className="eyebrow">PLAYER MODULE</p>
           <h1>{names[moduleId] ?? "Personal module"}</h1>
