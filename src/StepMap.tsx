@@ -95,7 +95,7 @@ export default function StepMap({ startDate, missions }: Props) {
                     src="/journey-climber-v1-small.png"
                     alt=""
                     aria-hidden="true"
-                    fetchPriority="high"
+                    decoding="async"
                   />
                 )}
                 {completed ? (
