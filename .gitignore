@@ -8,3 +8,6 @@ creds.conf
 *.pem
 *.key
 *.p12
+
+# Local Netlify folder
+.netlify
