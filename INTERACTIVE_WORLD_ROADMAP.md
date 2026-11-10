@@ -14,7 +14,7 @@ This roadmap tracks the visual and interaction upgrade in three phases. Existing
 
 **Delivered in the current checkpoint:** responsive 21-step map with separate landscape/portrait artwork and point layouts; only day numbers are overlaid on the scene; a procedural Three.js character, 3D stone route, lighting, and subtle motes follow the actual challenge day; selectable day details; reduced-motion and WebGL fallback support. The compressed character sprite remains only as the fallback. Build is passing.
 
-## Phase 2 — Interactive Realms (in progress)
+## Phase 2 — Interactive Realms (complete)
 
 Turn existing modules into destinations with consistent motion, visual depth, and meaningful entry feedback. Start with the current quest-module launcher; extend the same patterns to Home and Progress.
 
@@ -29,21 +29,24 @@ Turn existing modules into destinations with consistent motion, visual depth, an
 
 **Acceptance:** each destination still opens its existing module; all existing save/log actions behave as before; motion is brief and disabled or reduced when requested by the device; effects do not block taps or reduce text contrast.
 
-## Phase 3 — Selective 3D Adventure Layer (in progress)
+## Phase 3 — Full 3D Adventure Layer (complete)
 
-Add real-time 3D only where it adds value, beginning with the journey path and character. Keep the rest of the app fast and readable.
+Create a consistent real-time 3D world across all primary destinations while preserving readable, accessible controls and existing product behavior.
 
 - Use a compact procedural 3D character and stylized stone path with the camera framing the current step.
 - Let the player tap unlocked steps to inspect progress; animate the character to the actual current day only.
 - Add subtle depth, lighting, particles, and environmental reactions. Avoid long unskippable sequences.
-- Lazy-load the 3D scene after the profile/map or realm is opened; limit mobile rendering to 30 fps and pause off-screen/hidden scenes; keep a 2.5D fallback for reduced motion and WebGL failure.
-- Reuse the Phase 2 visual system for distinct scenes, including Training Grounds, Study Hall, Guild Board, Recovery Sanctuary, Home, Progress, Challenges, and Inventory, without duplicating the underlying module features.
+- Keep one low-detail animated environment behind all main destinations; use tailored 3D scene objects for Training Grounds, Study Hall, Guild Board, Recovery Sanctuary, Home, Progress, Challenges, Inventory, and Profile.
+- Limit mobile rendering to 30 fps and pause off-screen/hidden scenes; honor reduced motion and retain CSS/background fallbacks if WebGL fails.
+- Extend 3D depth and touch feedback to mission rows, rank tiles, progress cards, shop objects, profile controls, challenge tiles, and module portals without replacing semantic HTML inputs/buttons.
 
-**Acceptance:** all existing app flows work with WebGL enabled and disabled; scene assets load on demand; text and controls remain accessible; no challenge rules or local data are changed; both desktop and portrait layouts stay usable; mobile rendering stays lightweight.
+**Delivered:** a shared Three.js environment under every main page; bespoke 3D models for Home, Profile, Quests, Challenges, Progress, Inventory, and each quest module; touch-responsive 3D card depth across data-heavy screens; portrait and landscape journey scenes; desktop and phone rendering caps; hidden/off-screen pause; reduced-motion support; existing controls and product data behavior preserved. Production build passes.
+
+**Acceptance:** verify a device-level performance pass and Google sign-in on physical iOS/Android devices before treating hardware-specific results as verified. Layout and production-build checks passed in the current implementation.
 
 ## Implementation notes
 
-- Use the existing React components, CSS motion, and Framer Motion first. Three.js is now a separate lazy chunk; current build output is about 589 KB raw / 149 KB gzip for that chunk, with a 468 KB raw main entry.
+- Use the existing React components, CSS motion, and Framer Motion for accessible UI; Three.js provides the scene layer. It remains a separate chunk of about 590 KB raw / 150 KB gzip, with a 468 KB raw main entry.
 - Keep scene artwork and character files in `public/` with descriptive versioned names. Do not overwrite the original reference image or backup folder.
 - Use original generated or clearly licensed art. Never put text labels inside scene backgrounds; render interface text in HTML.
 - Check phone layouts, tap targets, reduced-motion behavior, loading states, and offline/PWA behavior before marking a phase complete.

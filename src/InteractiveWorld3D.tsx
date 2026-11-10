@@ -24,6 +24,9 @@ const realmColors: Record<string, number> = {
   digital: 0x9de783,
   home: 0xb6a0ff,
   challenges: 0x73dfff,
+  quests: 0x8dafff,
+  government: 0xffc26e,
+  profile: 0xb9a4ff,
   progress: 0xf2c878,
   inventory: 0x8be0ad,
 };
@@ -136,6 +139,36 @@ function addRealmObject(scene: THREE.Scene, group: THREE.Group, kind: string) {
     return mesh;
   };
 
+  if (kind === "ambient") {
+    const stone = new THREE.MeshStandardMaterial({ color: 0x31384f, metalness: 0.65, roughness: 0.42, transparent: true, opacity: 0.52, emissive: 0x121a33, emissiveIntensity: 0.38 });
+    const crystalMat = new THREE.MeshStandardMaterial({ color: 0x8a78e8, metalness: 0.75, roughness: 0.24, transparent: true, opacity: 0.62, emissive: 0x4034a0, emissiveIntensity: 0.72 });
+    for (const side of [-1, 1]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.56, 10, 5), stone);
+      pillar.position.set(side * 5.1, 0.05, -1.6);
+      pillar.rotation.z = side * -0.035;
+      group.add(pillar);
+      const capital = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.42, 1.1), dark);
+      capital.position.set(side * 5.1, 4.95, -1.35);
+      group.add(capital);
+      const foot = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 1.2), stone);
+      foot.position.set(side * 5.1, -4.8, -1.35);
+      group.add(foot);
+      for (let index = 0; index < 3; index++) {
+        const shard = new THREE.Mesh(new THREE.OctahedronGeometry(0.32 + index * 0.08, 0), crystalMat);
+        shard.position.set(side * (3.7 + index * 0.55), -3.1 + index * 2.7, -0.7);
+        shard.rotation.set(0.4 * index, side * 0.3, 0.2);
+        group.add(shard);
+      }
+    }
+    for (let index = 0; index < 5; index++) {
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(1.65 - index * 0.12, 0.12, 0.82), index === 2 ? accent : stone);
+      slab.position.set((index - 2) * 0.9, -4.45 + index * 0.38, -0.9 + index * 0.08);
+      slab.rotation.z = index % 2 ? 0.05 : -0.05;
+      group.add(slab);
+    }
+    return;
+  }
+
   if (kind === "home") {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.44, 0.055, 8, 28), accent);
     ring.rotation.x = 0.45;
@@ -149,6 +182,62 @@ function addRealmObject(scene: THREE.Scene, group: THREE.Group, kind: string) {
     const sparkle = new THREE.Mesh(new THREE.OctahedronGeometry(0.08, 0), cream);
     sparkle.position.set(0.52, 0.42, 0.08);
     group.add(sparkle);
+    return;
+  }
+
+  if (kind === "profile") {
+    const bust = new THREE.Mesh(new THREE.SphereGeometry(0.31, 14, 12), accent);
+    bust.position.y = 0.14;
+    group.add(bust);
+    const face = new THREE.Mesh(new THREE.SphereGeometry(0.19, 12, 10), cream);
+    face.position.set(0, 0.25, 0.24);
+    group.add(face);
+    const shoulders = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 0.24, 3, 8), dark);
+    shoulders.scale.z = 0.68;
+    shoulders.position.y = -0.25;
+    group.add(shoulders);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.035, 7, 32), accent);
+    halo.rotation.x = 0.72;
+    halo.rotation.y = 0.18;
+    halo.position.y = 0.12;
+    group.add(halo);
+    return;
+  }
+
+  if (kind === "quests") {
+    const pages = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.6), cream);
+    pages.position.y = -0.1;
+    pages.rotation.z = -0.05;
+    group.add(pages);
+    const cover = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.12, 0.64), accent);
+    cover.position.set(0, -0.22, -0.02);
+    cover.rotation.z = -0.05;
+    group.add(cover);
+    const rune = new THREE.Mesh(new THREE.OctahedronGeometry(0.2, 1), cream);
+    rune.position.set(0.1, 0.2, 0.08);
+    group.add(rune);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.025, 6, 28), accent);
+    ring.rotation.x = 0.9;
+    ring.rotation.y = 0.4;
+    ring.position.y = 0.02;
+    group.add(ring);
+    return;
+  }
+
+  if (kind === "challenges") {
+    const portal = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.07, 9, 28), accent);
+    portal.rotation.x = 0.32;
+    portal.position.y = 0.18;
+    group.add(portal);
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.21, 1), cream);
+    core.position.y = 0.18;
+    group.add(core);
+    [-0.48, 0, 0.48].forEach((x, index) => {
+      const tile = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.1, 0.42), index === 1 ? accent : dark);
+      tile.position.set(x, -0.42 + Math.abs(x) * 0.26, 0.04);
+      tile.rotation.z = index === 0 ? -0.08 : index === 2 ? 0.08 : 0;
+      group.add(tile);
+    });
     return;
   }
 
@@ -332,6 +421,8 @@ export default function InteractiveWorld3D({
     let limbs: THREE.Group[] = [];
     const target = new THREE.Vector3();
     const viewport = { width: 1, height: 1, worldHeight: kind === "journey" ? 10 : 2.6 };
+    let environment: THREE.Group | undefined;
+    if (kind === "ambient") viewport.worldHeight = 12;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isSmallScreen = window.matchMedia("(max-width: 620px)").matches;
 
@@ -357,13 +448,15 @@ export default function InteractiveWorld3D({
       viewport.width = Math.max(1, rect.width);
       viewport.height = Math.max(1, rect.height);
       const aspect = viewport.width / viewport.height;
-      viewport.worldHeight = kind === "journey" ? 10 : 2.6;
+      viewport.worldHeight = kind === "journey" ? 10 : kind === "ambient" ? 12 : 2.6;
       camera.left = (-viewport.worldHeight * aspect) / 2;
       camera.right = (viewport.worldHeight * aspect) / 2;
       camera.top = viewport.worldHeight / 2;
       camera.bottom = -viewport.worldHeight / 2;
       camera.updateProjectionMatrix();
       renderer.setSize(viewport.width, viewport.height, false);
+      if (kind === "ambient" && environment)
+        environment.scale.x = (viewport.worldHeight * aspect) / 12;
       if (kind === "journey" && climber && points.length) {
         const point = points[Math.max(0, Math.min(points.length - 1, currentDayRef.current - 1))];
         target.set(
@@ -452,9 +545,14 @@ export default function InteractiveWorld3D({
     } else {
       const artifact = new THREE.Group();
       addRealmObject(scene, artifact, kind);
-      artifact.scale.setScalar(0.95);
+      if (kind === "ambient") {
+        environment = artifact;
+        artifact.scale.set(viewport.worldHeight * (canvas.clientWidth / Math.max(1, canvas.clientHeight)) / 12, 1, 1);
+      }
+      else artifact.scale.setScalar(0.95);
       scene.add(artifact);
       animated.push(artifact);
+      if (kind !== "ambient") {
       const halo = new THREE.Mesh(
         new THREE.TorusGeometry(0.78, 0.018, 6, 36),
         new THREE.MeshStandardMaterial({ color: realmColors[kind] ?? 0xb09aff, emissive: realmColors[kind] ?? 0xb09aff, emissiveIntensity: 0.6, transparent: true, opacity: 0.48 }),
@@ -468,6 +566,7 @@ export default function InteractiveWorld3D({
       );
       platform.position.y = -0.62;
       scene.add(platform);
+      }
     }
 
     const resize = new ResizeObserver(measure);
@@ -482,7 +581,8 @@ export default function InteractiveWorld3D({
       pointer.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     let lastFrameTime = 0;
     const render = () => {
       if (disposed) return;
@@ -495,11 +595,12 @@ export default function InteractiveWorld3D({
         return;
       }
       lastFrameTime = now;
-      const time = clock.getElapsedTime();
+      timer.update(now);
+      const time = timer.getElapsed();
       if (!reducedMotion) {
         for (const item of animated) {
-          item.rotation.y = kind === "journey" ? Math.sin(time * 0.6) * 0.025 : time * 0.24;
-          if (kind !== "journey") item.position.y = Math.sin(time * 1.4) * 0.07;
+          item.rotation.y = kind === "journey" ? Math.sin(time * 0.6) * 0.025 : kind === "ambient" ? Math.sin(time * 0.22) * 0.012 : time * 0.24;
+          if (kind !== "journey" && kind !== "ambient") item.position.y = Math.sin(time * 1.4) * 0.07;
         }
         if (climber) {
           const point = points[Math.max(0, Math.min(points.length - 1, currentDayRef.current - 1))];
@@ -539,6 +640,7 @@ export default function InteractiveWorld3D({
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pointermove", onPointerMove);
       resize.disconnect();
+      timer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments || object instanceof THREE.Points) {
           object.geometry.dispose();

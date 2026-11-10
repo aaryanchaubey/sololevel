@@ -1137,6 +1137,9 @@ export default function App() {
     );
   return (
     <div className={`app theme-${activeTheme}`}>
+      <Suspense fallback={null}>
+        <InteractiveWorld3D kind="ambient" className="app-world3d" />
+      </Suspense>
       {showWelcome && !googleUser && (
         <div className="welcome-backdrop">
           <div className="welcome panel">
@@ -1611,10 +1614,13 @@ export default function App() {
             </>
           )}
           {tab === "Challenges" && (
-            <div className="challenge-realm">
-              <Suspense fallback={null}>
-                <InteractiveWorld3D kind="challenges" className="challenge-realm-world" />
-              </Suspense>
+            <div className="challenge-realm page-realm">
+              <RealmBanner
+                kind="challenges"
+                eyebrow="PERSONAL ARENA"
+                title="Challenges"
+                subtitle="Build a ranked streak or track one personal goal at a time."
+              />
               <PersonalChallenges
                 challenges={personalChallenges}
                 logs={data.personalChallengeLogs ?? []}
@@ -1630,6 +1636,12 @@ export default function App() {
           {tab === "Quests" &&
             (activeModule === "government" ? (
               <>
+                <RealmBanner
+                  kind="government"
+                  eyebrow="GUILD NOTICE BOARD"
+                  title="Government openings"
+                  subtitle="Review official notices and keep application links close."
+                />
                 <button className="round-back government-back" type="button" onClick={() => setActiveModule(null)} aria-label="Back" title="Back">
                   <ArrowLeft size={18} />
                 </button>
@@ -1986,8 +1998,12 @@ export default function App() {
           )}
           {tab === "Profile" && (
             <>
-              <p className="eyebrow">PLAYER CONFIGURATION</p>
-              <h1>Profile & settings</h1>
+              <RealmBanner
+                kind="profile"
+                eyebrow="PLAYER CONFIGURATION"
+                title="Profile & settings"
+                subtitle="Your journey, identity, and local data controls."
+              />
               <StepMap startDate={profileChallenge?.startDate} missions={data.missions} />
               <div className="panel settings-card">
                 <h2>Account</h2>
