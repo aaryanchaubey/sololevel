@@ -7,6 +7,7 @@ type Props = {
   logs: PersonalChallengeLog[];
   activeId?: string;
   focus?: "main" | "personal";
+  mainEnabled?: boolean;
   onCreate: (title: string, goal: string, durationDays: number) => void;
   onLog: (challengeId: string, date: string, completed: boolean) => void;
   onCancel: (challengeId: string) => void;
@@ -28,6 +29,7 @@ export default function PersonalChallenges({
   logs,
   activeId,
   focus = "main",
+  mainEnabled = true,
   onCreate,
   onLog,
   onCancel,
@@ -214,7 +216,7 @@ export default function PersonalChallenges({
             ))}
         </div>
       )}
-      <div className="panel challenge-focus-settings">
+      {mainEnabled && <div className="panel challenge-focus-settings">
         <b>Dashboard challenge</b>
         <p className="muted">
           Switch between this personal goal and the ranked 21-day challenge.
@@ -235,7 +237,7 @@ export default function PersonalChallenges({
             Personal challenge
           </button>
         </div>
-      </div>
+      </div>}
     </section>
   );
 }

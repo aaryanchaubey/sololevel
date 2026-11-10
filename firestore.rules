@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function communityAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/communityAdmins/$(request.auth.uid));
+    }
+    // Signed-in players can read the opt-in public board. A player can only
+    // publish or remove the document whose ID is their Firebase Auth UID.
+    // Personal logs, emails, ages, notes and module records have no rule here.
+    match /leaderboard/{playerUid} {
+      function ownsProfile() {
+        return request.auth != null && request.auth.uid == playerUid;
+      }
+
+      function validPublicProfile() {
+        let profile = request.resource.data;
+        return profile.keys().hasAll([
+            'displayName', 'avatarId', 'lifetimeXp', 'weeklyXp', 'tierScore',
+            'challengeWins', 'mainChallengeCompletions', 'fitnessRank', 'studyRank', 'careerRank',
+            'disciplineRank', 'createdAt', 'updatedAt'
+          ])
+          && profile.keys().hasOnly([
+            'displayName', 'avatarId', 'lifetimeXp', 'weeklyXp', 'tierScore',
+            'challengeWins', 'mainChallengeCompletions', 'fitnessRank', 'studyRank', 'careerRank',
+            'disciplineRank', 'createdAt', 'updatedAt'
+          ])
+          && profile.displayName is string
+          && profile.displayName.size() > 0
+          && profile.displayName.size() <= 40
+          && profile.avatarId is string
+          && profile.avatarId.size() <= 8
+          && profile.lifetimeXp is int
+          && profile.lifetimeXp >= 0
+          && profile.lifetimeXp <= 1000000000
+          && profile.weeklyXp is int
+          && profile.weeklyXp >= 0
+          && profile.weeklyXp <= 100000
+          && profile.tierScore is int
+          && profile.tierScore >= 0
+          && profile.tierScore <= 68
+          && profile.challengeWins is int
+          && profile.challengeWins >= 0
+          && profile.challengeWins <= 100000
+          && profile.mainChallengeCompletions is int
+          && profile.mainChallengeCompletions >= 0
+          && profile.mainChallengeCompletions <= 100000
+          && profile.fitnessRank is string
+          && profile.fitnessRank.size() <= 20
+          && profile.studyRank is string
+          && profile.studyRank.size() <= 20
+          && profile.careerRank is string
+          && profile.careerRank.size() <= 20
+          && profile.disciplineRank is string
+          && profile.disciplineRank.size() <= 20
+          && profile.updatedAt == request.time;
+      }
+
+      allow read: if request.auth != null;
+      allow create: if ownsProfile()
+        && validPublicProfile()
+        && request.resource.data.createdAt == request.time;
+      allow update: if ownsProfile()
+        && validPublicProfile()
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if ownsProfile();
+    }
+
+    // Admin identities are provisioned from Firebase Console/Admin SDK only.
+    // No browser client can create or grant an administrator role.
+    match /communityAdmins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    match /globalChallenges/{challengeId} {
+      function validSubmission() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['ownerUid','ownerName','title','goal','durationDays','startDate','endDate','status','participantCount','createdAt'])
+          && d.keys().hasAll(['ownerUid','ownerName','title','goal','durationDays','startDate','endDate','status','createdAt'])
+          && d.ownerUid == request.auth.uid
+          && d.ownerName is string && d.ownerName.size() > 0 && d.ownerName.size() <= 40
+          && d.title is string && d.title.size() >= 4 && d.title.size() <= 60
+          && d.goal is string && d.goal.size() >= 8 && d.goal.size() <= 240
+          && d.durationDays is int && d.durationDays >= 1 && d.durationDays <= 90
+          && d.startDate is string && d.startDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && d.endDate is string && d.endDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && d.status == 'pending_review'
+          && (!('participantCount' in d) || d.participantCount == 0)
+          && d.createdAt == request.time;
+      }
+      allow read: if signedIn() && (communityAdmin() || resource.data.status == 'published' || resource.data.ownerUid == request.auth.uid);
+      allow create: if signedIn() && validSubmission();
+      allow update, delete: if communityAdmin();
+
+      match /participants/{uid} {
+        function challengeIsPublic() {
+          return get(/databases/$(database)/documents/globalChallenges/$(challengeId)).data.status == 'published';
+        }
+        allow read: if signedIn() && (communityAdmin() || resource.data.uid == request.auth.uid || challengeIsPublic());
+        allow create: if signedIn() && request.auth.uid == uid && challengeIsPublic()
+          && request.resource.data.keys().hasOnly(['uid','joinedAt'])
+          && request.resource.data.uid == uid && request.resource.data.joinedAt == request.time;
+        allow update: if false;
+        allow delete: if signedIn() && request.auth.uid == uid;
+        match /checkins/{dateKey} {
+          function isParticipant() {
+            return exists(/databases/$(database)/documents/globalChallenges/$(challengeId)/participants/$(uid));
+          }
+          allow read: if signedIn() && (communityAdmin() || request.auth.uid == uid || get(/databases/$(database)/documents/globalChallenges/$(challengeId)).data.status == 'published');
+          allow create: if signedIn() && request.auth.uid == uid && isParticipant()
+            && dateKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && dateKey >= get(/databases/$(database)/documents/globalChallenges/$(challengeId)).data.startDate
+            && dateKey <= get(/databases/$(database)/documents/globalChallenges/$(challengeId)).data.endDate
+            && get(/databases/$(database)/documents/globalChallenges/$(challengeId)).data.status == 'published'
+            && request.resource.data.keys().hasOnly(['uid','date','completed','createdAt'])
+            && request.resource.data.uid == uid && request.resource.data.date == dateKey
+            && request.resource.data.completed == true && request.resource.data.createdAt == request.time;
+          allow update: if false;
+          allow delete: if signedIn() && request.auth.uid == uid;
+        }
+      }
+    }
+
+    match /globalChallengeReports/{reportId} {
+      allow create: if signedIn()
+        && reportId == request.resource.data.challengeId + '_' + request.auth.uid
+        && request.resource.data.keys().hasOnly(['challengeId','reporterUid','reason','status','createdAt'])
+        && request.resource.data.challengeId is string
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.reason in ['Offensive or abusive','Unsafe or harmful','Spam or misleading','Other']
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow read: if communityAdmin() || (signedIn() && resource.data.reporterUid == request.auth.uid);
+      allow update: if communityAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt'])
+        && request.resource.data.status in ['pending','kept','removed'];
+      allow delete: if false;
+    }
+  }
+}

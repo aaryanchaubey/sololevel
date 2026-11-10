@@ -5,7 +5,7 @@
 **Project:** `D:\Startup\SoloLevel\solo-leveling-v1`  
 **Last reviewed:** 10 November 2026
 
-**Current state:** Core local features are implemented across Phases 1–5; security and challenge checks have been strengthened. Final build and browser/device QA are still outstanding. Phase 6 requires an official feed/service decision; booster balancing is intentionally unresolved.
+**Current state:** XP inventory, architecture documentation, opt-in leaderboard, and global challenge/moderation client code are in the working tree. The production build passed during this session. Firestore creation/rules deployment, admin UID provisioning, multi-account lifecycle QA, and mobile/desktop QA remain external checks. No production deployment is claimed here.
 **Source of product rules:** `CODEX_HANDOFF.md`
 
 ## Progress summary
@@ -24,8 +24,8 @@
 ## Completed foundations
 
 - [x] React + TypeScript + Vite PWA with install manifest and generated service worker.
-- [x] Local Dexie/IndexedDB player state; no cloud sync or live leaderboard.
-- [x] Five primary destinations: Home, Quests, Progress, Inventory and Profile.
+- [x] Local Dexie/IndexedDB player state; private module logs remain local. Separate opt-in public aggregate leaderboard/community features use Firestore.
+- [x] Five bottom navigation destinations plus header Inventory and Profile; Challenges includes personal and global challenge flows.
 - [x] Seven mission definitions and four independent rank records.
 - [x] Challenge engine scores expected missions, counts unlogged eligible missions against the result, excludes skips from the denominator, advances category ranks independently, and protects against duplicate evaluation.
 - [x] Nine challenge-engine tests and two local-PIN tests pass in the latest `npm test` run (10 November 2026).
@@ -120,7 +120,7 @@
 - [x] Challenge UI shows active date range/day and completed category counts, percentages and history; [ ] final user/browser QA.
 - [x] Automated tests cover category independence, consecutive boundary pass/reset, one-tier demotion, floor/ceiling, 80% threshold math, unlogged missions, skip denominator and duplicate evaluation; expand as needed.
 - [x] Recovery skip awards one per two qualifying successful 21-day challenge completions; can only be used on a missed mission inside the active challenge and preserves its missed origin.
-- [ ] Task boosters remain earned and task-scoped; no coin/shop/tier booster. Confirm balancing rules before inventing award rates or stacking behavior.
+- [x] XP shop catalog, minimum 1,000 XP floor, targeted/universal one-use boosters and Recovery Skip use rules are implemented; [ ] verify purchase/use/history flow manually.
 - [ ] Achievements/medals remain permanent and have auditable criteria; add category/rank history and richer analytics.
 - [x] Weekly full JSON snapshots use timestamped filenames; manual export/import works without folder access; no daily JSON generation.
 - [x] Validate backup app/version/schema/payload and SHA-256 integrity before replacing state; module defaults are merged for older payloads. [ ] Add schema migration tests and restore round-trip browser QA.
@@ -128,7 +128,15 @@
 - [ ] Reinstall restore: choose the retained backup folder again if browser permission was lost, or import JSON manually.
 - [ ] Notifications require opt-in, honor quiet hours and disclose that current reminders run only while the app is open.
 - [ ] Test offline startup, PWA install/update, keyboard access, reduced motion, mobile/desktop layouts, empty/loading/error states and browser storage failures (manual device/browser QA).
-- [ ] Global leaderboard remains locked. No cloud sync, account sign-in or user-log transmission in V1.
+- [x] Opt-in leaderboard supports lifetime XP, combined tier score, last-7-day XP, and ranked challenge wins; aggregate documents omit private logs.
+- [x] XP-only inventory includes recovery support, four category boosters and a universal booster; each purchase costs at least 1,000 XP.
+- [x] Global challenge lifecycle client: authenticated submission, pending moderation, publish/reject, join, daily check-ins, standings, reports, keep/remove and admin dashboard.
+- [x] Profile switch hides the ranked challenge/journey UI while retaining local records; personal/global challenges remain available.
+- [ ] Create Firebase Firestore database on Spark and deploy restrictive rules; verify real account permissions.
+- [ ] Add admin Google UID to `communityAdmins/{uid}` from Firebase Console; test five-tap entry, review, reports, removal and admin-panel exit.
+- [ ] Test challenge creation/filtering, join/leave, date-bound check-ins, multi-account standings and completion history on mobile and desktop.
+- [ ] Confirm private logs/emails/age are absent from Firestore. Participant UID and dated check-ins are shared within published challenges by design.
+- [ ] Admin counts cover opted-in leaderboard profiles and their client-published completion totals, not all Firebase Auth accounts.
 
 ## Definition of done
 
@@ -136,7 +144,7 @@
 - [ ] Every module has an end-to-end flow, persisted records, complete edit/correction behavior, useful history and empty/error states (some records are append/status-only).
 - [x] Current challenge scoring and rank progression rules pass 9 automated engine tests; [ ] inventory use/audit UI acceptance QA.
 - [ ] Backup restore and migrations pass round-trip tests and manual PWA reinstall simulation.
-- [x] `npm test` passes (11 tests). [ ] User-run `npm run build`, production dependency audit and browser/PWA checks.
+- [x] `npm test` passed historically (11 tests). [x] `npm run build` passed after current implementation; bundle-size warning remains. [ ] Browser/PWA/account QA and dependency audit.
 - [ ] No placeholder control is presented as completed behavior; no fabricated job notice; no product rule changes without explicit approval.
 - [x] Update this tracker and `CODEX_HANDOFF.md` with the current implementation state before committing/pushing.
 
@@ -145,4 +153,5 @@
 - Automatic government notice aggregation is not safe to mark complete without verified official data feeds, source attribution/refresh checks, and an explicitly hosted aggregation service. V1 remains local-first and currently has no backend deployment; the existing module truthfully supports official links and user-entered notices.
 - The app now attributes a partial IFCT 2017 catalog and its derived recipe estimates. Broader food coverage, additional IFCT micronutrients, custom recipe ingredients, and future packaged-food data remain open.
 - User must run the production build and install/offline/restore checks in their browser/device. This coding session does not claim those results.
-- Task booster award rate/effect/cap/expiry are intentionally not invented because the approved handoff leaves those economy rules unspecified.
+- Global leaderboard/community values are client-reported, not server-verified. No Cloud Functions, paid services, all-account analytics endpoint or cheat prevention is added.
+- Admin passwords are not stored in source or Firestore. Firebase Auth handles the secondary admin credential; the matching Auth UID is allowlisted from Firebase Console. The supplied plaintext password was intentionally not copied into the app.

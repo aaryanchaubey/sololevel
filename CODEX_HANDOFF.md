@@ -14,7 +14,7 @@
 3. Implement in the phases below. At the start of each phase, report what already exists, what is incomplete, and the intended files/approach. Do not treat placeholder cards or UI labels as completed modules.
 4. Run the relevant checks after implementation. Package scripts currently include `npm test` (Vitest) and `npm run build`. Add focused tests for critical rules as needed, then run them and the production build. Do not claim a check passed unless it ran successfully. Report environment/tooling blockers and their exact effect.
 5. Keep product rules below fixed. Never silently change scoring, rank progression, skip eligibility, backup frequency, or privacy behavior. If a necessary product decision is absent or contradictory, explain the conflict and ask before choosing a new rule; continue independent work meanwhile.
-6. Do not introduce cloud storage, account sign-in, analytics transmission, purchases, coins, or a live leaderboard in V1. Do not transmit personal logs.
+6. Do not add cloud sync for private profile/module logs or analytics transmission. **Current user-approved exception:** Firebase Google identity, opt-in public leaderboard snapshots, and public community challenges/check-ins may use Firestore under the strict, minimal-field rules in this repository. Never transmit private logs.
 7. Maintain schema and backup versioning. Any persisted shape change needs a safe migration and backward-compatible backup import where possible. Do not overwrite the only backup or silently discard existing data.
 8. At each phase end, summarize changed files, behavior, checks run and outcomes, unresolved blockers, and remaining phases. Do not state the app is complete until all acceptance criteria are implemented and verified.
 
@@ -22,7 +22,7 @@
 
 Solo Leveling is a local-first, offline-capable, mobile-first personal progression PWA with desktop support. Real-world effort is represented through daily missions, personal modules, four separate category ranks, lifetime XP, history, medals and analytics. The interface should feel like a polished dark fantasy/RPG system while keeping tracking practical, respectful and truthful.
 
-V1 is for one local player. Global multiplayer/leaderboard remains disabled and under development. Google sign-in is only a possible future authentication option; it does not itself provide multiplayer and must not be added to V1. Future Windows packaging is a later release consideration.
+The product is local-first for private player records. Google sign-in identifies a player but does not sync private records. The user has since approved an opt-in aggregate leaderboard and moderated community challenges; read the current amendment below and `README.md` for their privacy and setup boundaries. Future Windows packaging is a later release consideration.
 
 ## 3. Navigation and experience
 
@@ -168,7 +168,7 @@ Themes: Shadow, Silver, Gold, red-black, Monarch, Inferno, Frost, Emerald and So
 
 ## 10. Leaderboard and account boundary
 
-Profile may show `Global Leaderboard — Locked / Under Development` with a concise explanation. No network leaderboard, account, Google Sign-In or cloud sync in V1. Future multiplayer requires separate opt-in, backend, server-side score validation, anti-cheat, privacy controls and explicit product approval. A settings toggle must not imply multiplayer is operational or transmit data.
+Legacy scope is superseded by the user-approved amendment in section 15: Google-authenticated opt-in aggregate leaderboard plus moderated, self-reported global challenges. Private module logs stay local. Do not claim client-published ranks or community check-ins are verified/cheat-proof.
 
 ## 11. Existing repository snapshot and inspection notes
 
@@ -176,7 +176,7 @@ Reviewed files include `package.json`, `README.md`, `src/App.tsx`, `src/types.ts
 
 - Scripts: `npm run dev`, `npm run build`, `npm run preview`, and `npm test` (Vitest). The project currently uses Vite 8 and the PWA plugin.
 - Dependencies include React 18, TypeScript ~5.6, Vite 8, Dexie 4, Framer Motion, Lucide, Vitest 5 and `vite-plugin-pwa` 2.
-- The application has five tabs, seven mission cards, four rank records, Dexie persistence, JSON download/import, folder picker/weekly backup attempts, a cycling theme button, PWA configuration and a disabled leaderboard. Home Complete/Missed controls are self-reported; do not reintroduce module-record gating without explicit approval.
+- The app includes local Dexie records, weekly JSON backups, Google identity, optional aggregate leaderboard publication, and community challenge code. Check the live tracker for what still requires Firebase deployment and device QA. Home mission controls remain self-reported.
 - README tracks remaining release work; individual workflows have partial local forms, and their visible presence does not mean the full approved modules are complete.
 - `App.tsx` currently uses `DEFAULT_DATA` and simplified inline state. Verify persistence, restore and side effects before extending. In particular inspect when saving an imported backup, stale closure risks, File System Access API availability and whether backup timestamps/filenames can overwrite same-day files.
 - `src/engine/challenge.ts` now scores expected eligible missions (including unlogged misses and Sunday fitness/meditation), excludes used skips from the denominator without counting them as completions, applies ranks independently, resets boundary streaks on failure, limits rank movement, and blocks duplicate/early evaluation. Five focused engine tests currently pass. Continue expanding coverage and check the remaining edge cases.
@@ -193,7 +193,7 @@ This snapshot includes a successful production build and focused unit-test run, 
 - Seven approved missions, status correction and XP delta handling, four independent rank ladders, 21-day challenge history/progress, category counters and 80% threshold display are implemented. Scoring compares the exact ratio, not its rounded display. Recovery skips are limited to already-missed tasks within the active challenge and preserve the missed origin. Automated tests cover calendar boundaries, category independence, threshold math, rank-boundary streaks, duplicate rows and skip scoring. Manual UI QA remains.
 - Fitness, sleep, study/revision, career, hydration, food estimate and private No FAP/digital discipline workspaces are implemented locally. The nutrition module has 20 IFCT 2017 Table 1 foods and an ingredient-weight recipe calculator that saves per-serving macros plus ingredient/code provenance. Calcium and iron are sourced from IFCT Table 5 where present; absent values remain unavailable, and recipe totals appear only when every ingredient has coverage. This remains a partial catalog; custom ingredient estimation and other micronutrients remain. Some module records offer status changes while full edit/delete workflows and browser QA remain incomplete.
 - Government jobs is still last in the user workflow. Official Employment News, NCS, UPSC, SSC, IBPS and RRB links, locally saved notices, checked-at dates, status, deadlines and eligibility notes are available. There is no automatic official feed or verified aggregator. The repository has no deployed backend; do not scrape cross-origin pages or fabricate notices. A trusted official feed and hosting choice are required before this item can be marked complete.
-- Browser notifications honor configured quiet hours but run only while the app is open; background reminders require later platform/service-worker work. Theme cycling, automatic highest-rank theme, dark fantasy visuals and reduced-motion styling are present. Global leaderboard/cloud sync remain intentionally deferred.
+- Browser notifications honor configured quiet hours but run only while the app is open; background reminders require later platform/service-worker work. Theme cycling, automatic highest-rank theme, dark fantasy visuals and reduced-motion styling are present. Community Firestore setup and end-to-end moderation QA remain external.
 - Unspecified task-booster award rates, cap, effect and expiry remain intentionally unimplemented, per the fixed product rules above. Database schema is still version 1; module defaults support older local payloads, but formal Dexie schema migrations and round-trip migration tests remain.
 - Production build, accessibility/mobile/install/offline testing, folder restore simulation, development/production audit, and user browser/device QA are still outstanding. Keep the tracker current and do not label the application complete until those checks and the external feed/data requirements are resolved.
 ## 12. Development phases
@@ -210,7 +210,7 @@ This snapshot includes a successful production build and focused unit-test run, 
 
 **Phase 5 — Progress and release features.** Achievements/medals, analytics, notifications/quiet hours, optional local PIN and optional encrypted backups with honest security language. Audit privacy, offline behavior, keyboard/accessibility, mobile/desktop and PWA install/restore paths.
 
-**Phase 6 — Government recruitment module.** Build last, based on verified official-source requirements and clear source timestamps. Do not add global leaderboard or cloud sync as part of this phase.
+**Phase 6 — Government recruitment module.** Build last, based on verified official-source requirements and clear source timestamps. Keep private records local; the approved aggregate/community Firestore features are documented in section 15.
 
 ## 13. Acceptance criteria / test plan
 
@@ -231,8 +231,19 @@ Automated tests should cover pure engine and persistence/import logic; UI flows 
 13. Invalid, corrupt, wrong-app, unsupported-version and tampered backups are rejected before state replacement. Valid backups restore all supported records/settings. Restore after reinstall works via manual JSON even when directory permission is gone.
 14. Backup failure/permission denial is visible and never marked successful; no false promise that browser permission survives reinstall.
 15. Six themes persist and switch without reload; layout remains usable on small mobile and desktop.
-16. Privacy boundary: no cloud requests/account/leaderboard transmission; local warning and destructive-data confirmation are clear.
-17. Modules persist user-entered records and show useful empty/error states; government jobs is last in implementation order; leaderboard remains disabled.
+16. Privacy boundary: private logs remain local; sharing requires explicit leaderboard opt-in; community check-in UID/date rows are shared only for published challenges; clear restore and sharing notices are present.
+17. Modules persist user-entered records and show useful empty/error states; government jobs is last in implementation order; leaderboard and community challenges require Firebase configuration and rules deployment.
+
+## 15. User-approved global challenge and admin amendment
+
+- The Challenges destination now has the existing personal no-XP tracker plus global community challenges. Google-authenticated players can submit a title, daily goal, start date, and 1–90 day duration. New submissions must remain `pending_review` until an allowlisted moderator approves them.
+- Filter abusive challenge names/goals in the client and maintain admin pre-moderation plus a report queue. Do not describe a client profanity filter as exhaustive. Users can report a published challenge for offensive/abusive, unsafe, spam/misleading, or other reasons. Moderators can publish, reject, keep, or remove a challenge from public discovery. Keep moderation outcome/history.
+- Signed-in users can join, make per-date self-reported check-ins, view standings by completed-day count then current streak, and leave. Community challenges award no XP and never modify personal rank ladders. Participant UID and check-in dates are public within the authenticated community challenge for competition; never attach private module logs or notes.
+- Profile `Show main challenge` switch hides the ranked challenge and 21-day journey map from that account's UI, retaining past mission/rank history. Personal and global challenges remain available. Local storage means this visibility preference does not automatically sync between devices.
+- Admin entry is five taps on the header brand. It uses a separate Firebase Auth email/password user on a named secondary Firebase app, then checks that UID against the server-controlled `communityAdmins/{uid}` Firestore allowlist. “Admin logout” signs out only this secondary session and leaves the Google player signed in. Admin roles must never be writable by browser clients.
+- Do not embed or write the supplied plaintext password in source, Netlify variables, GitHub or Firestore. Firebase Auth handles the password; configure the non-secret admin ID/email mapping and create the account in Firebase Console, then add its UID to the Firestore allowlist. Do not simulate credential checks with client-side hard-coded passwords.
+- Admin statistics mean opted-in leaderboard profiles, their self-published ranked-challenge completion totals, community challenge records, participant records and pending reports—not all Firebase Auth signups. Client-computed stats are self-reported and do not prove identity totals.
+- Firestore remains on the free Spark plan for this client-only design. The owner must create Firestore, deploy restrictive `firestore.rules`, and manually provision the admin UID. No Cloud Functions, service-account keys, public unauthenticated writes, or paid services are added. Build success is not proof of cloud setup, mobile QA, or moderation readiness.
 18. Notifications respect opt-in permission, settings and quiet hours; app remains usable offline for local functionality.
 
 ## 14. How to continue in Codex from VS Code

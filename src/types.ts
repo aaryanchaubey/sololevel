@@ -58,6 +58,20 @@ export interface PersonalChallengeLog {
   note?: string;
   createdAt: string;
 }
+export type CommunityChallengeStatus = "pending_review" | "published" | "rejected" | "removed" | "completed";
+export interface CommunityChallenge {
+  id: string;
+  ownerUid: string;
+  ownerName: string;
+  title: string;
+  goal: string;
+  durationDays: number;
+  startDate: string;
+  endDate: string;
+  status: CommunityChallengeStatus;
+  createdAt: string;
+  participantCount?: number;
+}
 export interface RankProgress {
   category: Category;
   tier: Tier;
@@ -90,6 +104,7 @@ export interface AppSettings {
   quietHours: { enabled: boolean; start: string; end: string };
   leaderboardEnabled: boolean;
   dashboardChallengeFocus?: "main" | "personal";
+  mainChallengeEnabled?: boolean;
 }
 export interface AppProfile {
   id: "local-player";

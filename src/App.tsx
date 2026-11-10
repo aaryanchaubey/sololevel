@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowLeft,
@@ -23,7 +23,6 @@ import {
   Utensils,
   Droplets,
   Moon,
-  Settings,
   Trophy,
   Zap,
   X,
@@ -53,10 +52,15 @@ import {
   listenForGoogleUser,
   signInWithGoogle,
   signOutGoogle,
+  listenForAdminUser,
+  signInCommunityAdmin,
+  signOutCommunityAdmin,
 } from "./firebaseAuth";
 import type { User } from "firebase/auth";
 import StepMap from "./StepMap";
 import RealmBanner from "./RealmBanner";
+import { SHOP_PRODUCTS } from "./data/inventoryCatalog";
+import { findMissionBooster, purchaseInventoryProduct } from "./engine/inventory";
 import {
   downloadGoogleDriveBackup,
   googleSyncIsConfigured,
@@ -65,6 +69,8 @@ import {
   uploadGoogleDriveBackup,
 } from "./googleDriveSync";
 const InteractiveWorld3D = lazy(() => import("./InteractiveWorld3D"));
+const Leaderboard = lazy(() => import("./Leaderboard"));
+const CommunityChallenges = lazy(() => import("./CommunityChallenges"));
 const missions: {
   id: MissionId;
   title: string;
@@ -131,25 +137,6 @@ const missions: {
   },
 ];
 const categories: Category[] = ["fitness", "study", "career", "discipline"];
-const shopItems = [
-  {
-    id: "recovery-skip",
-    label: "Recovery Skip",
-    description:
-      "Excuse one mission marked missed during an active 21-day challenge. It never counts as a completion.",
-    kind: "recovery_skip" as const,
-    target: "any" as const,
-    price: 1200,
-  },
-  {
-    id: "mission-booster",
-    label: "Mission Booster",
-    description: "Add 50% bonus XP to your next newly completed main mission.",
-    kind: "booster" as const,
-    target: "any" as const,
-    price: 1000,
-  },
-];
 const themes = [
   "shadow",
   "silver",
@@ -188,6 +175,7 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [googleUser, setGoogleUser] = useState<User | null>(null);
+  const [adminUser, setAdminUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(!firebaseAuthIsConfigured);
   const [authBusy, setAuthBusy] = useState(false);
   const [selectedSummaryMonth, setSelectedSummaryMonth] = useState("");
@@ -203,6 +191,9 @@ export default function App() {
   const [googleSyncStatus, setGoogleSyncStatus] = useState(
     "Not connected in this session",
   );
+  const [adminOpen, setAdminOpen] = useState(false);
+  const brandTapCount = useRef(0);
+  const brandTapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const day = today();
   useEffect(() => {
     if (!firebaseAuthIsConfigured) return;
@@ -210,6 +201,10 @@ export default function App() {
       setGoogleUser(user);
       setAuthReady(true);
     });
+  }, []);
+  useEffect(() => {
+    if (!firebaseAuthIsConfigured) return;
+    return listenForAdminUser(setAdminUser);
   }, []);
   useEffect(() => {
     loadAppData()
@@ -441,12 +436,11 @@ export default function App() {
   const challengeFocus =
     data.settings.dashboardChallengeFocus ??
     (activePersonalChallenge ? "personal" : "main");
-  const profileChallenge =
-    data.activeChallenge?.status === "active"
+  const profileChallenge = data.settings.mainChallengeEnabled === false
+    ? undefined
+    : data.activeChallenge?.status === "active"
       ? data.activeChallenge
-      : data.challenges
-          .slice()
-          .sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+      : data.challenges.slice().sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
   const monthlySummaries = (data.monthlySummaries ?? []).slice().sort((a, b) =>
     b.month.localeCompare(a.month),
   );
@@ -604,14 +598,10 @@ export default function App() {
     const existing = data.missions.find(
       (m) => m.date === missionDate && m.missionId === id,
     );
+    const missionCategory = missions.find((mission) => mission.id === id)?.category;
     const booster =
       status === "complete" && existing?.status !== "complete"
-        ? data.inventory.find(
-            (item) =>
-              item.kind === "booster" &&
-              item.target === "any" &&
-              item.quantity > 0,
-          )
+        ? findMissionBooster(data.inventory, missionCategory)
         : undefined;
     const baseXp = missions.find((x) => x.id === id)?.xp ?? 0;
     const missionXp =
@@ -663,43 +653,14 @@ export default function App() {
     );
   }
   function purchaseShopItem(productId: string) {
-    const product = shopItems.find((item) => item.id === productId);
+    const product = SHOP_PRODUCTS.find((item) => item.id === productId);
     if (!product) return;
-    const availableXp = data.profile.availableXp ?? data.profile.lifetimeXp;
-    if (availableXp < product.price) {
-      setNotice(
-        `You need ${product.price - availableXp} more XP to buy ${product.label}.`,
-      );
-      return;
+    try {
+      setData(purchaseInventoryProduct(data, product));
+      setNotice(`${product.label} added to inventory.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Purchase could not be completed.");
     }
-    const existing = data.inventory.find(
-      (item) =>
-        item.kind === product.kind &&
-        item.target === product.target &&
-        item.label === product.label,
-    );
-    setData({
-      ...data,
-      profile: { ...data.profile, availableXp: availableXp - product.price },
-      inventory: existing
-        ? data.inventory.map((item) =>
-            item.id === existing.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item,
-          )
-        : [
-            ...data.inventory,
-            {
-              id: crypto.randomUUID(),
-              kind: product.kind,
-              target: product.target,
-              label: product.label,
-              quantity: 1,
-              earnedAt: new Date().toISOString(),
-            },
-          ],
-    });
-    setNotice(`${product.label} added to inventory.`);
   }
   function missionReady(id: MissionId) {
     const modules = data.modules ?? DEFAULT_MODULES;
@@ -923,6 +884,25 @@ export default function App() {
     setGoogleAccessToken(token);
     setGoogleSyncStatus("Google Drive connected for this browser session");
     return token;
+  }
+  async function beginAdminLogin(id: string, password: string) {
+    await signInCommunityAdmin(id, password);
+  }
+  function handleBrandTap() {
+    brandTapCount.current += 1;
+    if (brandTapTimer.current) clearTimeout(brandTapTimer.current);
+    brandTapTimer.current = setTimeout(() => {
+      brandTapCount.current = 0;
+    }, 1800);
+    if (brandTapCount.current >= 5) {
+      brandTapCount.current = 0;
+      setAdminOpen(true);
+      setTab("Challenges");
+    }
+  }
+  async function endAdminSession() {
+    await signOutCommunityAdmin();
+    setAdminOpen(false);
   }
   async function connectGoogleDrive() {
     try {
@@ -1204,7 +1184,7 @@ export default function App() {
         </div>
       )}
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" onClick={handleBrandTap}>
           <div className="brand-mark">SL</div>
           <div>
             <b>SOLO LEVELING</b>
@@ -1243,10 +1223,11 @@ export default function App() {
           </button>
           <button
             className="icon-btn"
-            title="Settings"
-            onClick={() => setTab("Profile")}
+            title="Open inventory"
+            aria-label="Open inventory"
+            onClick={() => setTab("Inventory")}
           >
-            <Settings />
+            <Archive />
           </button>
           <button
             className="player-chip profile-trigger"
@@ -1270,7 +1251,7 @@ export default function App() {
             ["Quests", Flame],
             ["Progress", ChartNoAxesCombined],
             ["Challenges", CalendarDays],
-            ["Inventory", Archive],
+            ["Leaderboard", Trophy],
           ].map(([label, Icon]: any) => (
             <button
               key={label}
@@ -1441,20 +1422,20 @@ export default function App() {
                   </h3>
                   <span>— PLAYER SYSTEM</span>
                 </section>
-                <section className="panel challenge-card">
-                  {challengeFocus === "personal" && activePersonalChallenge ? (
+                {(data.settings.mainChallengeEnabled !== false || activePersonalChallenge) && <section className="panel challenge-card">
+                  {activePersonalChallenge && (challengeFocus === "personal" || data.settings.mainChallengeEnabled === false) ? (
                     <>
                       <div className="section-head">
                         <div>
                           <p className="eyebrow">PERSONAL CHALLENGE · NO XP</p>
                           <h3>{activePersonalChallenge.title}</h3>
                         </div>
-                        <button
+                        {data.settings.mainChallengeEnabled !== false && <button
                           className="challenge-switch"
                           onClick={() => setChallengeFocus("main")}
                         >
                           Return to main challenge
-                        </button>
+                        </button>}
                       </div>
                       <p className="muted">{activePersonalChallenge.goal}</p>
                       <p className="muted">
@@ -1609,7 +1590,7 @@ export default function App() {
                       </button>
                     </>
                   )}
-                </section>
+                </section>}
               </div>
             </>
           )}
@@ -1619,7 +1600,7 @@ export default function App() {
                 kind="challenges"
                 eyebrow="PERSONAL ARENA"
                 title="Challenges"
-                subtitle="Build a ranked streak or track one personal goal at a time."
+                subtitle="Track personal goals or join a moderated community competition."
               />
               <PersonalChallenges
                 challenges={personalChallenges}
@@ -1630,7 +1611,11 @@ export default function App() {
                 onLog={logPersonalChallenge}
                 onCancel={cancelPersonalChallenge}
                 onFocus={setChallengeFocus}
+                mainEnabled={data.settings.mainChallengeEnabled !== false}
               />
+              <Suspense fallback={<div className="panel community-empty">Loading challenge arena…</div>}>
+                <CommunityChallenges user={googleUser} adminUser={adminUser} adminOpen={adminOpen} onSignIn={beginGoogleLogin} onAdminLogin={beginAdminLogin} onAdminLogout={() => { void endAdminSession(); }} />
+              </Suspense>
             </div>
           )}
           {tab === "Quests" &&
@@ -1917,6 +1902,11 @@ export default function App() {
               </div>
             </>
           )}
+          {tab === "Leaderboard" && (
+            <Suspense fallback={<div className="panel community-empty">Loading leaderboard…</div>}>
+              <Leaderboard user={googleUser} data={data} onSignIn={beginGoogleLogin} />
+            </Suspense>
+          )}
           {tab === "Inventory" && (
             <>
               <RealmBanner
@@ -1953,39 +1943,60 @@ export default function App() {
                     XP
                   </span>
                 </div>
-                <div className="shop-grid">
-                  {shopItems.map((item) => (
-                    <article className="panel shop-item" key={item.id}>
-                      <span className="shop-item-icon">
-                        {item.kind === "recovery_skip" ? (
-                          <ShieldCheck size={20} />
-                        ) : (
-                          <Zap size={20} />
-                        )}
-                      </span>
-                      <h3>{item.label}</h3>
-                      <p className="muted">{item.description}</p>
-                      <button
-                        className="primary"
-                        disabled={
-                          (data.profile.availableXp ??
-                            data.profile.lifetimeXp) < item.price
-                        }
-                        onClick={() => purchaseShopItem(item.id)}
-                      >
-                        <Zap size={15} />
-                        {item.price} XP
-                      </button>
-                    </article>
-                  ))}
-                </div>
+                <p className="muted inventory-economy-note">
+                  Rewards use earned XP only. Boosters affect one new mission completion and never change ranks or challenge results. Every reward costs at least 1,000 XP.
+                </p>
+                {[
+                  { id: "challenge-support", title: "Challenge support", copy: "A one-use safety net for an eligible missed mission." },
+                  { id: "mission-boosters", title: "Mission boosters", copy: "Choose a focused category boost or save for the universal boost." },
+                ].map((group) => (
+                  <section className="shop-category" key={group.id}>
+                    <div className="shop-category-heading">
+                      <h3>{group.title}</h3>
+                      <span className="muted">{group.copy}</span>
+                    </div>
+                    <div className="shop-grid">
+                      {SHOP_PRODUCTS.filter((item) => item.section === group.id).map((item) => {
+                        const ProductIcon = item.kind === "recovery_skip"
+                          ? ShieldCheck
+                          : item.target === "fitness"
+                            ? Dumbbell
+                            : item.target === "study"
+                              ? BookOpen
+                              : item.target === "career"
+                                ? BriefcaseBusiness
+                                : item.target === "discipline"
+                                  ? LockKeyhole
+                                  : Zap;
+                        return (
+                          <article className="panel shop-item" key={item.id}>
+                            <span className="shop-item-icon"><ProductIcon size={20} /></span>
+                            <h3>{item.label}</h3>
+                            <p className="muted">{item.description}</p>
+                            <small className="shop-item-effect">{item.effect}</small>
+                            <button
+                              className="primary"
+                              disabled={(data.profile.availableXp ?? data.profile.lifetimeXp) < item.price}
+                              onClick={() => purchaseShopItem(item.id)}
+                            >
+                              <Zap size={15} />
+                              {item.price.toLocaleString()} XP
+                            </button>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </section>
               {data.inventory.length ? (
                 data.inventory.map((i) => (
                   <div className="panel history-row" key={i.id}>
-                    <span>{i.label}</span>
+                    <span>
+                      {i.label}
+                      <small>{i.kind === "booster" ? `${i.target === "any" ? "Any" : i.target} mission · +50% XP once` : "One eligible missed mission in an active 21-day challenge"}</small>
+                    </span>
                     <b>×{i.quantity}</b>
-                    <small>{i.kind.replace("_", " ")}</small>
                   </div>
                 ))
               ) : (
@@ -2004,7 +2015,11 @@ export default function App() {
                 title="Profile & settings"
                 subtitle="Your journey, identity, and local data controls."
               />
-              <StepMap startDate={profileChallenge?.startDate} missions={data.missions} />
+              {data.settings.mainChallengeEnabled !== false && <StepMap startDate={profileChallenge?.startDate} missions={data.missions} />}
+              <div className="panel settings-card challenge-visibility-setting">
+                <div><h2>Main challenge visibility</h2><p className="muted">Hide or show the ranked 21-day challenge on your dashboard and journey map. This changes visibility only; mission history and rank records remain saved.</p></div>
+                <label className="setting-switch"><input type="checkbox" checked={data.settings.mainChallengeEnabled !== false} onChange={(event) => setData({ ...data, settings: { ...data.settings, mainChallengeEnabled: event.target.checked, dashboardChallengeFocus: activePersonalChallenge ? "personal" : "main" } })} /><span>Show main challenge</span></label>
+              </div>
               <div className="panel settings-card">
                 <h2>Account</h2>
                 {googleUser ? (
