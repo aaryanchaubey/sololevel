@@ -1,6 +1,6 @@
 # Solo Leveling — Personal Progression PWA
 
-Solo Leveling is a local-first, offline-capable personal tracking and progression app. It combines seven daily missions, four independent rank ladders, a 21-day challenge, fitness/study/career/nutrition/recovery modules, XP rewards, personal and moderated global challenges, monthly summaries, backups, and an optional opt-in leaderboard.
+Solo Leveling is a local-first, offline-capable personal tracking and progression app. It combines seven daily missions, four independent rank ladders, a 21-day challenge, fitness/study/career/nutrition/recovery modules, XP rewards, personal and report-moderated global challenges, monthly summaries, backups, and an optional opt-in leaderboard.
 
 > **Data ownership:** mission and module details are stored in this browser/device using IndexedDB. Google sign-in identifies the player; it does not sync private logs. The opt-in leaderboard publishes a small aggregate profile. Joining a published global challenge also shares the participant UID and dated check-ins with signed-in users so standings can be compared.
 
@@ -111,7 +111,7 @@ The service worker can cache the app shell for offline startup. Google sign-in, 
 | **Home** | Player status, four independent ranks, seven daily missions, and ranked/personal challenge focus |
 | **Quests** | Mission module launcher and individual logging workspaces |
 | **Progress** | Monthly summaries, rank ladders, challenge results, weekly chart, achievements and history |
-| **Challenges** | Local personal challenge plus moderated global challenges with opt-in check-ins, standings and reports |
+| **Challenges** | Local personal challenge plus live-on-create global challenges with opt-in check-ins, standings and reports |
 | **Inventory** | XP reward catalog, spendable XP balance, owned items and item quantities |
 | **Leaderboard** | Opt-in public standings for signed-in Google players; requires Firebase Firestore setup below |
 | **Profile** | Player details, avatar, themes, privacy settings, local PIN and backup/restore controls |
@@ -202,13 +202,13 @@ Leaderboard sorting options are Lifetime XP, Combined tier score, Last 7 days XP
 
 ## Global community challenges and admin moderation
 
-The Challenges page supports local personal goals plus Firebase-backed community challenges. Google sign-in is required for the community area. Challenge text is filtered in the browser and submissions enter `pending_review`; only an allowlisted admin can publish or reject them. Approved challenges can be joined, checked in once per date, compared on standings (completed days, then current streak), reported, and removed from the public list. Completed/expired challenges remain visible as history. Community events award no XP and do not change the four rank ladders.
+The Challenges page supports local personal goals plus Firebase-backed community challenges. Google sign-in is required for the community area. Challenge text is filtered in the browser and new challenges publish immediately. Players can join, check in once per date, compare standings (completed days, then current streak), and report a live challenge. Reports enter the allowlisted admin's review queue but do not hide or pause the challenge. The admin can keep it live or remove it for everyone. Completed/expired challenges remain visible as history. Community events award no XP and do not change the four rank ladders.
 
 Challenge check-ins and the participant UID are shared with signed-in users on that published challenge so standings can be compared. These are self-reported check-ins, not verified evidence. The language filter is not a substitute for review; reports appear in the admin queue. Never use this feature for health claims, prizes, or sensitive personal details.
 
 ### Safe admin access
 
-The header brand's five-tap shortcut opens a separate admin sign-in panel. The admin is a separate Firebase Authentication email/password user on a second Firebase Auth instance; this keeps the current Google player signed in. Enable the Email/Password provider in Firebase Authentication, set `VITE_COMMUNITY_ADMIN_LOGIN_ID` (defaults to `aaryanchaubey`) and `VITE_COMMUNITY_ADMIN_EMAIL` (the Firebase Auth email address) in `.env.local`/Netlify, then create that email/password user in Firebase Console. The password is entered only into Firebase Auth at sign-in and is never saved by the app.
+The Profile page has an Admin access section at the bottom; the header's five-tap shortcut is also available. Admin sign-in uses a separate Firebase Authentication email/password user on a second Firebase Auth instance, so the current Google player stays signed in. Enable the Email/Password provider in Firebase Authentication, set `VITE_COMMUNITY_ADMIN_LOGIN_ID` (defaults to `aaryanchaubey`) and `VITE_COMMUNITY_ADMIN_EMAIL` (the Firebase Auth email address) in `.env.local`/Netlify, then create that email/password user in Firebase Console. The password is entered only into Firebase Auth at sign-in and is never saved by the app.
 
 **Provisioning is done in Firebase Console by the project owner**, because browser clients cannot grant themselves admin rights. After creating the Firebase Auth user, copy its UID from the Authentication user list and add a document at `communityAdmins/{admin-auth-uid}` (for example fields `role: "admin"` and `createdAt: <timestamp>`). Do not add client write access to `communityAdmins`. The password previously pasted into chat is not embedded in source or Firestore; if you want to use it for the Firebase Auth account, enter it directly in the Firebase Console password field.
 

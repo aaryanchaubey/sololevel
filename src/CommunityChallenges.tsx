@@ -12,7 +12,6 @@ import {
   listCommunityStandings,
   listMyCommunitySubmissions,
   listMyCommunityParticipation,
-  listReviewQueue,
   logCommunityCheckin,
   moderateCommunityChallenge,
   reportCommunityChallenge,
@@ -56,7 +55,6 @@ export default function CommunityChallenges({
   onAdminLogout,
 }: Props) {
   const [rows, setRows] = useState<CommunityChallenge[]>([]);
-  const [review, setReview] = useState<CommunityChallenge[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [mySubmissions, setMySubmissions] = useState<CommunityChallenge[]>([]);
   const [joined, setJoined] = useState<Record<string, boolean>>({});
@@ -103,12 +101,10 @@ export default function CommunityChallenges({
       setJoined(nextJoined);
       setCheckins(nextLogs);
       if (adminUser) {
-        const [queue, flags, count] = await Promise.all([
-          listReviewQueue(),
+        const [flags, count] = await Promise.all([
           listCommunityReports(),
           communityAdminCounts(),
         ]);
-        setReview(queue);
         setReports(flags);
         setStats(count);
       }
@@ -185,7 +181,7 @@ export default function CommunityChallenges({
           start,
           end,
         ),
-      "Submitted for admin review. It will become visible to everyone after approval.",
+      "Challenge published. Players can join now; reports go to admin review and do not hide it.",
     );
     setCreating(false);
     setTitle("");
@@ -212,8 +208,8 @@ export default function CommunityChallenges({
           <p className="eyebrow">PLAYER COMMUNITY · SELF-REPORTED</p>
           <h2>Global challenges</h2>
           <p className="muted">
-            Compete through daily check-ins. Results are community fun and are
-            not independently verified.
+            Challenges publish immediately. Players can report concerns for
+            admin review; a challenge stays live unless an admin removes it.
           </p>
         </div>
         <div className="button-row">
@@ -294,43 +290,7 @@ export default function CommunityChallenges({
             not expose total account registrations to this client. Challenge and
             check-in totals are self-reported.
           </p>
-          <h3>Submissions awaiting review ({review.length})</h3>
-          {review.map((c) => (
-            <article className="panel community-review-row" key={c.id}>
-              <div>
-                <b>{c.title}</b>
-                <p>{c.goal}</p>
-                <small>
-                  By {c.ownerName} · {c.durationDays} days · starts{" "}
-                  {c.startDate}
-                </small>
-              </div>
-              <div className="button-row">
-                <button
-                  className="primary"
-                  onClick={() =>
-                    void run(
-                      () => moderateCommunityChallenge(c.id, "published"),
-                      "Challenge published.",
-                    )
-                  }
-                >
-                  Approve
-                </button>
-                <button
-                  className="danger"
-                  onClick={() =>
-                    void run(
-                      () => moderateCommunityChallenge(c.id, "rejected"),
-                      "Submission rejected.",
-                    )
-                  }
-                >
-                  Reject
-                </button>
-              </div>
-            </article>
-          ))}
+          <h3>Reports awaiting review ({reports.length})</h3>
           {reports.map((r) => (
             <article className="panel community-review-row" key={r.id}>
               <div>
@@ -344,10 +304,6 @@ export default function CommunityChallenges({
                 <button
                   onClick={() =>
                     void run(async () => {
-                      await moderateCommunityChallenge(
-                        r.challengeId,
-                        "published",
-                      );
                       await resolveCommunityReport(r.id, "kept");
                     }, "Challenge kept; report resolved.")
                   }
@@ -371,7 +327,7 @@ export default function CommunityChallenges({
               </div>
             </article>
           ))}
-          {!review.length && !reports.length && (
+          {!reports.length && (
             <p className="muted">Nothing waiting for review.</p>
           )}
         </section>
@@ -380,8 +336,9 @@ export default function CommunityChallenges({
         <section className="panel community-create">
           <h2>Submit a community challenge</h2>
           <p className="muted">
-            Submissions are reviewed before publication. Keep names respectful
-            and goals safe, specific, and achievable.
+            This challenge will go live as soon as you create it. Keep names
+            respectful and goals safe, specific, and achievable; players can
+            report concerns to admin review.
           </p>
           <label className="field-label">
             Challenge name
@@ -423,7 +380,7 @@ export default function CommunityChallenges({
             </label>
           </div>
           <button className="primary" onClick={() => void create()}>
-            Submit for review
+            Publish challenge
           </button>
         </section>
       )}

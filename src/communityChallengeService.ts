@@ -66,17 +66,6 @@ export async function listMyCommunitySubmissions(uid: string) {
   );
   return rows.docs.map((row) => fromDoc(row.id, row.data()));
 }
-export async function listReviewQueue() {
-  const rows = await getDocs(
-    query(
-      collection(adminStore(), "globalChallenges"),
-      where("status", "==", "pending_review"),
-      orderBy("createdAt", "asc"),
-      limit(100),
-    ),
-  );
-  return rows.docs.map((row) => fromDoc(row.id, row.data()));
-}
 export async function submitCommunityChallenge(
   user: User,
   title: string,
@@ -94,7 +83,7 @@ export async function submitCommunityChallenge(
     durationDays,
     startDate,
     endDate,
-    status: "pending_review",
+    status: "published",
     participantCount: 0,
     createdAt: serverTimestamp(),
   });

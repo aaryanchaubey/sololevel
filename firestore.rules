@@ -85,7 +85,7 @@ service cloud.firestore {
           && d.durationDays is int && d.durationDays >= 1 && d.durationDays <= 90
           && d.startDate is string && d.startDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
           && d.endDate is string && d.endDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-          && d.status == 'pending_review'
+          && d.status == 'published'
           && (!('participantCount' in d) || d.participantCount == 0)
           && d.createdAt == request.time;
       }
@@ -136,6 +136,14 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt'])
         && request.resource.data.status in ['pending','kept','removed'];
       allow delete: if false;
+    }
+
+    // Collection-group queries used to load a player's joined challenges must
+    // have an explicit recursive rule. Keep this limited to a participant's
+    // own document, with admins allowed for moderation and aggregate counts.
+    match /{path=**}/participants/{participantUid} {
+      allow read: if signedIn()
+        && (communityAdmin() || resource.data.uid == request.auth.uid);
     }
   }
 }
