@@ -10,6 +10,65 @@
 .weekly-bars{height:190px;display:grid;grid-template-columns:repeat(7,minmax(24px,1fr));gap:10px;align-items:end;padding:15px 4px 0}.weekly-bar{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}.weekly-bar i{display:block;width:min(28px,75%);min-height:4px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--accent),var(--accent2));transition:height .2s ease}.weekly-bar span,.weekly-bar small{font-size:10px;color:var(--muted)}
 .achievement-list{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.achievement-medal{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--accent);font-size:11px;animation:panel-enter .2s ease-out both}
 .pin-error{color:#ff8e9f;font-size:12px}
+
+/* Responsive add-ons for the challenge shop and faster mobile logging. */
+.page-transition{animation:page-transition-in .2s cubic-bezier(.2,.7,.2,1) both}
+@keyframes page-transition-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.challenge-switch,.create-personal-shortcut{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font-size:11px;font-weight:700;cursor:pointer}
+.create-personal-shortcut{margin-top:12px;color:var(--accent)}
+.cancel-challenge{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#48272e;color:#ffc4ce;border:1px solid #79404a;flex:0 0 auto}
+.activity-quick-picks,.quick-food-presets>div,.quick-ingredient-row{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 9px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.activity-quick-picks button,.quick-food-presets button,.quick-ingredient-row button{flex:0 0 auto;padding:10px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);font-size:12px;cursor:pointer;min-height:40px}
+.activity-quick-picks button.selected,.button-row button.selected,.quick-food-presets button:hover,.quick-ingredient-row button:hover{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel2))}
+.previous-performance{margin:-4px 0 12px;padding:10px 12px;background:var(--panel2);border-radius:9px;color:var(--muted)}
+.quick-food-presets,.quick-ingredient-row{display:grid;gap:8px;margin:8px 0 14px}
+.quick-food-presets>b,.quick-ingredient-row>b{font-size:11px;color:var(--accent);letter-spacing:.5px}
+.quick-food-presets small{color:var(--muted);font-size:10px;line-height:1.5}
+.ingredient-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0 0 14px;max-height:220px;overflow:auto}
+.ingredient-option{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);text-align:left;cursor:pointer}
+.ingredient-option span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.ingredient-option small{white-space:nowrap;color:var(--muted);font-size:9px}
+.ingredient-option.selected{border-color:var(--accent);color:var(--accent)}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:12px 0 20px}
+.shop-item{display:grid;grid-template-columns:36px 1fr;column-gap:10px;align-items:center}
+.shop-item-icon{grid-row:span 2;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:var(--panel2);color:var(--accent)}
+.shop-item h3{margin:0;font-size:14px}
+.shop-item .muted,.shop-item .primary{grid-column:1/-1}
+.shop-balance{padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--accent);font-size:11px;font-weight:700;white-space:nowrap}
+.personal-challenges .section-head{align-items:flex-end;gap:12px}
+.personal-challenges>h1,.personal-challenges h1{font:600 clamp(26px,4vw,38px) 'Space Grotesk';margin:0}
+.personal-challenge-card{margin:16px 0}
+.personal-challenge-heading,.personal-challenge-actions,.personal-date{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.personal-challenge-heading h2{margin:0}
+.personal-date{justify-content:flex-start;color:var(--muted);font-size:11px}
+.personal-day-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0}
+.personal-day{min-width:0;min-height:60px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px;padding:9px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);text-align:left;cursor:pointer}
+.personal-day span:first-child{font-size:11px;font-weight:700}.personal-day small{grid-row:2;font-size:9px;color:var(--muted)}.personal-day svg,.day-dot{grid-column:2;grid-row:1/3;color:#70d9a7}.day-dot{width:9px;height:9px;border-radius:50%;background:#59647a;justify-self:center}
+.personal-day.is-complete{border-color:#3d755f;background:color-mix(in srgb,#70d9a7 10%,var(--panel2))}
+.personal-day:disabled{opacity:.46;cursor:not-allowed}
+.personal-challenge-history,.challenge-focus-settings{margin:18px 0}
+.challenge-empty{display:grid;justify-items:start;gap:8px;margin:18px 0}.challenge-empty svg{color:var(--accent)}.challenge-empty span{color:var(--muted);font-size:12px}
+.history-row>span:first-child small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+@media(max-width:620px){
+ .layout{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+ .sidebar{height:calc(62px + env(safe-area-inset-bottom));padding:6px 5px calc(6px + env(safe-area-inset-bottom));justify-content:flex-start;overflow-x:auto;scrollbar-width:none}
+ .sidebar::-webkit-scrollbar{display:none}
+ .nav{flex:1 0 58px;min-width:58px;padding:5px 2px;gap:3px;font-size:9px;white-space:nowrap}
+ .nav svg{width:18px;height:18px}
+ .content{padding:22px 12px 18px}
+ .panel{padding:14px;border-radius:13px}
+ .hero{gap:9px}.hero-level{min-width:84px;padding:9px 7px}.hero-level span{font-size:8px}.hero-level small{font-size:8px}
+ .mission-actions{gap:5px}.mission-actions button{min-height:38px;padding:8px 10px}
+ .lower-grid{gap:10px}.shop-grid{grid-template-columns:1fr}.shop-item{grid-template-columns:34px 1fr}
+ .history-row{flex-wrap:wrap;justify-content:flex-start;gap:8px 12px}.history-row>*{max-width:100%;overflow-wrap:anywhere}
+ .ingredient-picker{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .field-label input,.field-label select{min-width:0;font-size:16px;padding:11px}
+ .personal-day-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.personal-day{padding:7px;min-height:56px}
+ .personal-challenge-heading,.personal-challenge-actions{align-items:flex-start;flex-wrap:wrap}
+ .personal-challenge-actions .primary{width:100%;justify-content:center}
+ .challenge-card .section-head{align-items:flex-start;flex-wrap:wrap}.challenge-switch{min-height:40px}
+ .toast{bottom:calc(76px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}
+}
 .hidden-copy{display:none!important}.is-struck del{text-decoration-thickness:2px;text-decoration-color:var(--accent);opacity:.72}.reopen-btn{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:#43202a;color:#ff9aaa;cursor:pointer}.reopen-btn svg{width:15px;height:15px}.reopen-btn:hover{background:#682a38;border-color:#ff7088}.mission:has(.is-struck){background:#ffffff08}
 
 /* Quick, transform-only motion keeps the interface lively without slowing navigation. */
