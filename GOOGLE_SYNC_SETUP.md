@@ -11,8 +11,8 @@ Solo Leveling remains local-first. Google Drive support stores a portable JSON b
    - `https://solo-leveling-v1.netlify.app`
    - `http://localhost:5173`
 5. Copy the client ID (it ends in `.apps.googleusercontent.com`). A client ID is public browser configuration; never put a client secret in this app.
-6. In Netlify, open **Project configuration → Environment variables** and add `VITE_GOOGLE_CLIENT_ID` with that client ID. Trigger a production deploy after saving it.
-7. For local development, add the same value to `.env.local` in the project root, then restart Vite.
+6. `VITE_GOOGLE_CLIENT_ID` is configured in Netlify for all deploy contexts. The value is public browser configuration; never add a client secret to the app or environment variables.
+7. For local development, place the same client ID in `.env.local` in the project root, then restart Vite. This file is ignored by Git.
 
 ## Using the app
 
@@ -20,4 +20,4 @@ Open **Profile → Google account & Drive backup**, connect Google Drive, and ch
 
 Google access tokens stay in app memory only and are cleared when the app session ends. You will need to connect again after reopening the app. Drive access is limited to this app's hidden data folder. The hidden folder is not visible in the normal Drive file list; remove Solo Leveling's access from your Google Account security settings to revoke it.
 
-This client ID is currently not configured in Netlify, so the UI will show setup instructions until the environment variable is added and the site is redeployed.
+Netlify configuration is in place and the production site was rebuilt and redeployed on 10 November 2026. Google OAuth remains in testing mode, so each account that will connect must be listed as a test user until the app is published.
