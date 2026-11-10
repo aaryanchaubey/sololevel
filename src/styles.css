@@ -77,6 +77,8 @@
 .mission:nth-child(2){animation-delay:15ms}.mission:nth-child(3){animation-delay:30ms}.mission:nth-child(4){animation-delay:45ms}.mission:nth-child(5){animation-delay:60ms}.mission:nth-child(6){animation-delay:75ms}.mission:nth-child(7){animation-delay:90ms}
 .mission:has(.is-struck){border-left:2px solid #70d9a7;padding-left:9px}
 .recipe-calculator{border-color:color-mix(in srgb,var(--accent) 48%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,var(--accent2) 13%,var(--panel)),var(--panel))}
+.profile-trigger{border:0;background:transparent;color:var(--text);padding:0;font:inherit;cursor:pointer}
+.profile-trigger:hover .avatar{background:var(--panel2);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button:not(:disabled):hover:not(:active){transform:translateY(-1px)}
 @keyframes mission-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}

@@ -24,7 +24,6 @@ import {
   Moon,
   Settings,
   Trophy,
-  UserRound,
   Zap,
   X,
 } from "lucide-react";
@@ -48,6 +47,13 @@ import GovernmentJobs from "./GovernmentJobs";
 import { createPinCredential, verifyPin } from "./security";
 import PersonalChallenges from "./PersonalChallenges";
 import type { PersonalChallenge, PersonalChallengeLog } from "./types";
+import {
+  firebaseAuthIsConfigured,
+  listenForGoogleUser,
+  signInWithGoogle,
+  signOutGoogle,
+} from "./firebaseAuth";
+import type { User } from "firebase/auth";
 import {
   downloadGoogleDriveBackup,
   googleSyncIsConfigured,
@@ -169,6 +175,9 @@ export default function App() {
   const [tab, setTab] = useState("Home");
   const [notice, setNotice] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
+  const [googleUser, setGoogleUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(!firebaseAuthIsConfigured);
+  const [authBusy, setAuthBusy] = useState(false);
   const [name, setName] = useState("Player");
   const [showRestore, setShowRestore] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
@@ -182,6 +191,31 @@ export default function App() {
     "Not connected in this session",
   );
   const day = today();
+  useEffect(() => {
+    if (!firebaseAuthIsConfigured) return;
+    return listenForGoogleUser((user) => {
+      setGoogleUser(user);
+      setAuthReady(true);
+      if (user) {
+        setShowWelcome(false);
+        setName((currentName) =>
+          currentName === "Player"
+            ? user.displayName || user.email || "Player"
+            : currentName,
+        );
+        setData((current) => ({
+          ...current,
+          profile: {
+            ...current.profile,
+            displayName:
+              current.profile.displayName === "Player"
+                ? user.displayName || user.email || "Player"
+                : current.profile.displayName,
+          },
+        }));
+      }
+    });
+  }, []);
   useEffect(() => {
     loadAppData()
       .then((d) => {
@@ -983,7 +1017,30 @@ export default function App() {
       setNotice(e instanceof Error ? e.message : "Encrypted backup failed.");
     }
   }
-  if (!ready) return <div className="loading">LOADING PLAYER DATA…</div>;
+  async function beginGoogleLogin() {
+    setAuthBusy(true);
+    try {
+      await signInWithGoogle();
+      setNotice("Signed in with Google. Your progress remains stored on this device.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Google login failed.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+  async function logOutGoogle() {
+    setAuthBusy(true);
+    try {
+      await signOutGoogle();
+      setShowWelcome(true);
+      setNotice("Signed out of Google. Your local player data was kept on this device.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not sign out.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+  if (!ready || !authReady) return <div className="loading">LOADING PLAYER DATA…</div>;
   if (locked)
     return (
       <div className={`app theme-${activeTheme}`}>
@@ -1039,7 +1096,7 @@ export default function App() {
     );
   return (
     <div className={`app theme-${activeTheme}`}>
-      {showWelcome && (
+      {showWelcome && !googleUser && (
         <div className="welcome-backdrop">
           <div className="welcome panel">
             <div className="sigil">SL</div>
@@ -1082,8 +1139,13 @@ export default function App() {
                   setShowWelcome(false);
                 }}
               >
-                Initialize Player <ChevronRight size={17} />
+                Continue as Guest <ChevronRight size={17} />
               </button>
+              {firebaseAuthIsConfigured && (
+                <button onClick={beginGoogleLogin} disabled={authBusy}>
+                  {authBusy ? "Connecting…" : "Continue with Google"}
+                </button>
+              )}
               <button onClick={startFolder}>
                 <FolderOpen size={16} /> Choose backup folder
               </button>
@@ -1142,12 +1204,18 @@ export default function App() {
           >
             <Settings />
           </button>
-          <div className="player-chip">
+          <button
+            className="player-chip profile-trigger"
+            type="button"
+            title="Profile & settings"
+            aria-label="Open profile and settings"
+            onClick={() => setTab("Profile")}
+          >
             <div className="avatar">
               {data.profile.displayName.slice(0, 1).toUpperCase()}
             </div>
             <span>{data.profile.displayName}</span>
-          </div>
+          </button>
         </div>
       </header>
       <div className="layout">
@@ -1158,7 +1226,6 @@ export default function App() {
             ["Progress", ChartNoAxesCombined],
             ["Challenges", CalendarDays],
             ["Inventory", Archive],
-            ["Profile", UserRound],
           ].map(([label, Icon]: any) => (
             <button
               key={label}
@@ -1823,6 +1890,52 @@ export default function App() {
             <>
               <p className="eyebrow">PLAYER CONFIGURATION</p>
               <h1>Profile & settings</h1>
+              <div className="panel settings-card">
+                <h2>Account</h2>
+                {googleUser ? (
+                  <>
+                    <p>
+                      Signed in with Google as <b>{googleUser.email}</b>
+                    </p>
+                    <p className="muted">
+                      Your game progress stays on this device. Use Drive backup
+                      below to move a snapshot to another device.
+                    </p>
+                    <button
+                      className="danger"
+                      disabled={authBusy}
+                      onClick={logOutGoogle}
+                    >
+                      {authBusy ? "Signing out…" : "Log out"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="muted">
+                      You’re using a local guest profile. Sign in with Google
+                      to identify this account; your existing local progress is
+                      kept as-is.
+                    </p>
+                    {firebaseAuthIsConfigured ? (
+                      <button
+                        className="primary"
+                        disabled={authBusy}
+                        onClick={beginGoogleLogin}
+                      >
+                        {authBusy ? "Connecting…" : "Sign in with Google"}
+                      </button>
+                    ) : (
+                      <div className="warning inline-warning">
+                        <ShieldAlert />
+                        <p>
+                          Google account sign-in is not configured for this
+                          build yet. Guest mode remains available.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
               <div className="panel settings-card">
                 <h2>Local data & backup</h2>
                 <div className="warning inline-warning">
