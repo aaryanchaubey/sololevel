@@ -8,7 +8,8 @@ Solo Leveling remains local-first. Google Drive support stores a portable JSON b
 2. Configure the OAuth consent screen. Add your account as a test user while the app is in testing mode.
 3. Create an OAuth client ID for a **Web application**.
 4. Add these Authorized JavaScript origins:
-   - `https://solo-leveling-v1.netlify.app`
+   - `https://solo-leveling-u.netlify.app` (production)
+   - `https://solo-leveling-v1.netlify.app` (legacy URL retained for compatibility)
    - `http://localhost:5173`
 5. Copy the client ID (it ends in `.apps.googleusercontent.com`). A client ID is public browser configuration; never put a client secret in this app.
 6. `VITE_GOOGLE_CLIENT_ID` is configured in Netlify for all deploy contexts. The value is public browser configuration; never add a client secret to the app or environment variables.
